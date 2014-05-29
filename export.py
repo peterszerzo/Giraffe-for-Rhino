@@ -78,6 +78,7 @@ class Description:
 		
 		self.no = -1
 		self.prop = ""
+		self.description = ""
 		
 		if (s != ""):
 		
