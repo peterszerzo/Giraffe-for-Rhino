@@ -33,16 +33,16 @@ f = open("system.dat", "w")
 
 def english_to_sofi(word):
 	
-	if (word == "nodes"):
-		return "node"
-	elif (word == "beams"):
-		return "beam"
-	elif (word == "trusses"):
-		return "trus"
-	elif (word == "cables"):
-		return "cabl"
-	elif (word == "springs"):
-		return "spri"	
+    if (word == "nodes"):
+        return "node"
+    elif (word == "beams"):
+        return "beam"
+    elif (word == "trusses"):
+        return "trus"
+    elif (word == "cables"):
+        return "cabl"
+    elif (word == "springs"):
+        return "spri"	
 
 
 def is_taken_number(array, no, grp):
@@ -63,38 +63,40 @@ def is_taken_number(array, no, grp):
 
 class Layer:
 	
-	def __init__(self, name):
+    def __init__(self, name):
 	
-		self.name = name
-		self.path = name.split("::")
-		self.depth = len(self.path)
-		self.last = self.path[self.depth - 1]
+        self.name = name
+        self.path = name.split("::")
+        self.depth = len(self.path)
+        self.last = self.path[self.depth - 1]
 
 
 
 class Description:
 	
-	def __init__(self, s):
+    def __init__(self, s):
 		
-		self.no = -1
-		self.prop = ""
-		self.description = ""
+        self.no = -1
+        self.prop = ""
+        self.description = ""
 		
-		if (s != ""):
+        if (s != ""):
 		
-			i1 = s.find("[")
-			i2 = s.find("]")
+            i1 = s.find("[")
+            i2 = s.find("]")
+            
+            j1 = s.find("{")
+            j2 = s.find("}")
+            
+            if (i1 == -1 or i2 == -1):
 			
-			if (i1 == -1 or i2 == -1):
+                self.no = int(s.strip())
 			
-				self.no = int(s.strip())
-			
-			else:
+            else:
 				
-				no_string = s[0:(i1)].strip()
-				
-				self.no = (-1) if (no_string == "") else int(no_string)
-				self.prop = s[(i1 + 1):(i2)]
+                no_string = s[0:(i1)].strip()
+                self.no = (-1) if (no_string == "") else int(no_string)
+                self.prop = s[(i1 + 1):(i2)]
 
 
 
