@@ -29,6 +29,8 @@ import math
 
 import string
 
+number_characters = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
 point_elements = ["node"]
 
 line_elements = ["beam", "trus", "cabl"]
@@ -69,7 +71,7 @@ class Layer:
         self.path = name.split("::")
         self.depth = len(self.path)
         self.last = self.path[self.depth - 1]
-
+        
 
 
 class Description:
@@ -77,7 +79,9 @@ class Description:
     def __init__(self, s):
         
         self.no = -1
-        self.prop = ""	
+        self.prop = ""
+        
+        s = s.strip()
         
         if (s != ""):
             
@@ -86,7 +90,13 @@ class Description:
             
             if (i1 == -1 or i2 == -1):
                 
-                self.no = int(s.strip())
+                if (not s[0] in number_characters):
+                    
+                    self.prop = s
+                    
+                else:
+                
+                    self.no = int(s)
                 
             else:
             
@@ -106,6 +116,12 @@ class StructuralElement():
         self.prop = prop
         self.grp = grp
         self.strict_naming = strict_naming
+        
+        
+    def output_base(self):
+    
+        return (self.typ + " no " + str(self.no))
+
 
 
 
@@ -133,7 +149,7 @@ class Node(StructuralElement):
 		
     def export(self):
         
-        output = "node no " + str(self.no)
+        output = self.output_base()
         output += " x " + str(self.x)
         output += " y " + str(self.y)
         output += " z " + str(self.z)
@@ -164,7 +180,7 @@ class Member(StructuralElement):
         
     def export(self):
         
-        output = self.typ + " no " + str(self.no)
+        output = self.output_base()
         output += " na " + str(self.na)
         output += " ne " + str(self.ne)
         output += " " + self.prop + "\n"
@@ -187,7 +203,7 @@ class Quad(StructuralElement):
         
     def export(self):
         
-        output = "quad no " + str(self.no)
+        output = self.output_base()
         output += " n1 " + str(self.n1)
         output += " n2 " + str(self.n2)
         output += " n3 " + str(self.n4)
@@ -208,6 +224,7 @@ class ElementList:
     
     def update_fan(self, grp):
     
+        self.fan = 1
         while(is_taken_number(self.list, self.fan, grp)):
             self.fan += 1
 
@@ -220,14 +237,9 @@ class StructuralModel:
     
         self.name = name	
         
-        self.nodes = []
-        self.fan_node = 1 # fan = first available number
-        
-        self.members = []
-        self.fan_member = 1
-        
-        self.quads = []
-        self.fan_quad = 1
+        self.nodes = ElementList()
+        self.members = ElementList()         
+        self.quads = ElementList()  
         
         self.gdiv = 1000
         self.current_group = -1
@@ -239,50 +251,31 @@ class StructuralModel:
         self.output_quads = "\n\n!*!Label Area Elements\n"
         self.output_footer = "\nend"
         self.output = ""
-		
-		
-    def fan_node_update(self):
-    
-        self.fan_node = 1
-        while(is_taken_number(self.nodes, self.fan_node, -1)):
-            self.fan_node += 1
-            
-    def fan_member_update(self):
-    
-        self.fan_member = 1
-        while(is_taken_number(self.members, self.fan_member, self.current_group)):
-            self.fan_member += 1
-            
-    def fan_quad_update(self):
-    
-        self.fan_quad = 1
-        while(is_taken_number(self.quads, self.fan_quad, self.current_group)):
-            self.fan_quad += 1        
-		
-		
+
+			
     def add_node(self, n):
         
         if (n.no == -1):
             
-            for node in self.nodes:
+            for node in self.nodes.list:
                 if n.identical_to(node):
                     n.no = node.no
             if (n.no == -1):
-                n.no = self.fan_node
-                self.nodes.append(n)
+                n.no = self.nodes.fan
+                self.nodes.list.append(n)
                 
         else:
             
-            self.nodes.append(n)
-            l = len(self.nodes)
+            self.nodes.list.append(n)
+            l = len(self.nodes.list)
             
             for i in range(0, l - 1):
                 
-                if self.nodes[l - 1].no == self.nodes[i].no:
+                if self.nodes.list[l - 1].no == self.nodes.list[i].no:
                     
-                    self.nodes[i].no = self.fan_node
+                    self.nodes.list[i].no = self.nodes.fan
                     
-        self.fan_node_update()
+        self.nodes.update_fan(-1)
         
         return n
 				
@@ -299,24 +292,24 @@ class StructuralModel:
         
         if (attr.no == -1):
             
-            attr.no = self.fan_member
+            attr.no = self.members.fan
             
         else:
             
-            l = len(self.members)
+            l = len(self.members.list)
             
             for i in range(0, l):
                 
-                if (attr.no == self.members[i].no) and (self.current_group == self.members[i].grp):
+                if (attr.no == self.members.list[i].no) and (self.current_group == self.members.list[i].grp):
                     
-                    self.members[i].no = self.fan_member
+                    self.members.list[i].no = self.members.fan
                     
         e = Member(element_type, self.current_group, attr.no, node_a.no, node_e.no, attr.prop)
         
-        self.members.append(e)
+        self.members.list.append(e)
         self.output_members += e.export()
         
-        self.fan_member_update()
+        self.members.update_fan(self.current_group)
 	
 	
     def add_quad(self, obj):
@@ -333,29 +326,29 @@ class StructuralModel:
                 
         if (no == -1):
             
-            no = self.fan_quad
+            no = self.quads.fan
             
         else:
             
-            l = len(self.quads)
+            l = len(self.quads.list)
             
             for i in range(0, l):
                 
-                if (attr.no == self.quads[i].no) and (self.current_group == self.quads[i].grp):
+                if (attr.no == self.quads.list[i].no) and (self.current_group == self.quads.list[i].grp):
                     
-                    self.quads[i].no = self.fan_quad
+                    self.quads.list[i].no = self.quads.fan
                     
         q = Quad(self.current_group, no, corner_numbers, attr.prop)
         
-        self.quads.append(q)
+        self.quads.list.append(q)
         self.output_quads += q.export()
         
-        self.fan_quad_update()
+        self.quads.update_fan(self.current_group)
 		
 				
     def export_nodes(self):
         
-        for node in self.nodes:
+        for node in self.nodes.list:
             
             self.output_nodes += node.export()	
             
@@ -390,6 +383,19 @@ def Main():
             
             element_type = english_to_sofi(layer.path[1])
             
+            if (layer.depth > 2):
+            
+                attr = Description(layer.last)
+                prop = attr.prop
+                
+                if (layer.depth == 3):
+                    
+                    sofi.current_group = attr.no
+                    sofi.output_members += "\ngrp " + str(sofi.current_group) + "\n"
+                
+                if (prop != ""):
+                    sofi.output_members += "\n" + element_type + " prop " + prop + "\n"
+            
             if (element_type in point_elements):
             
                 sofi.current_group = -1
@@ -401,25 +407,8 @@ def Main():
                     sofi.add_node(n)
                     
             elif (element_type in line_elements):
-                
-                prop = ""
-                
-                if (layer.depth == 3):
                     
-                    attr = Description(layer.last)
-                    sofi.current_group = attr.no
-                    prop = attr.prop
-                    sofi.output_members += "\ngrp " + str(sofi.current_group) + "\n"
-                    
-                elif (layer.depth > 3):
-                    
-                    prop = layer.last
-                    
-                if (prop != ""):
-                    
-                    sofi.output_members += "\n" + element_type + " prop " + prop + "\n"
-                    
-                sofi.fan_member_update()
+                sofi.members.update_fan(sofi.current_group)
                     
                 objects = rs.ObjectsByLayer(layer.name)[::-1]
                 for obj in objects:
@@ -427,7 +416,7 @@ def Main():
                     
             elif (element_type in area_elements):
                 
-                prop = ""
+                sofi.quads.update_fan(sofi.current_group)
                 
                 objects = rs.ObjectsByLayer(layer.name)[::-1]
                 for obj in objects:
