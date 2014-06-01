@@ -96,17 +96,28 @@ class Description:
 
 
 
-class Node:
+class StructuralElement():
+
+    
+    def __init__(self, typ, no, prop, grp = -1, strict_naming = False):
+        
+        self.typ = typ
+        self.no = no
+        self.prop = prop
+        self.grp = grp
+        self.strict_naming = strict_naming
+
+
+
+class Node(StructuralElement):
     
     
     def __init__(self, no = -1, x = 0, y = 0, z = 0, prop = ""):
         
-        self.no = no
-        self.grp = -1
+        StructuralElement.__init__(self, "node", no, prop)
         self.x = x
         self.y = y
         self.z = z
-        self.prop = prop
 		
 		
     def build_from_point(self, obj):
@@ -141,17 +152,14 @@ class Node:
 
 
 
-class Member:	
+class Member(StructuralElement):	
 
 
     def __init__(self, typ, grp, no, na, ne, prop):
         
-        self.typ = typ
-        self.grp = grp
-        self.no = no
+        StructuralElement.__init__(self, typ, no, prop, grp)
         self.na = na
         self.ne = ne
-        self.prop = prop	
         
         
     def export(self):
@@ -165,18 +173,16 @@ class Member:
 
 
 
-class Quad:	
+class Quad(StructuralElement):	
 
 
     def __init__(self, grp, no, corner_numbers, prop):
         
-        self.grp = grp
-        self.no = no
+        StructuralElement.__init__(self, "quad", no, prop, grp)
         self.n1 = corner_numbers[0]
         self.n2 = corner_numbers[1]
         self.n3 = corner_numbers[2]
         self.n4 = self.n1 if (len(corner_numbers) <= 3) else corner_numbers[3]   
-        self.prop = prop	
         
         
     def export(self):
@@ -200,9 +206,9 @@ class ElementList:
         self.fan = 1
         
     
-    def add(self, element):
+    def update_fan(self, grp):
     
-        while(is_taken_number(self.list, self.fan, element.grp)):
+        while(is_taken_number(self.list, self.fan, grp)):
             self.fan += 1
 
 
@@ -238,7 +244,7 @@ class StructuralModel:
     def fan_node_update(self):
     
         self.fan_node = 1
-        while(is_taken_number(self.nodes, self.fan_node, self.current_group)):
+        while(is_taken_number(self.nodes, self.fan_node, -1)):
             self.fan_node += 1
             
     def fan_member_update(self):

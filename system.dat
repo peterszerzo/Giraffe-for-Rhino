@@ -9,7 +9,7 @@ syst init gdiv 1000
 node no 1 x -12.0 y -2.0 z 0.0 
 node no 2 x 12.0 y 9.0 z 0.0 
 node no 3 x -5.0 y -8.0 z 0.0 
-node no 1 x 19.0 y -13.0 z 0.0 
+node no 4 x 19.0 y -13.0 z 0.0 
 
 
 
@@ -22,7 +22,7 @@ trus prop ncs 10
 grp 1
 
 beam prop ncs 1
-beam no 1 na 3 ne 1 
+beam no 1 na 3 ne 4 
 beam no 2 na 1 ne 2 
 
 grp 2
