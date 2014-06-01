@@ -192,6 +192,21 @@ class Quad:
         
 
 
+class ElementList:
+
+    def __init__(self):
+        
+        self.list = []
+        self.fan = 1
+        
+    
+    def add(self, element):
+    
+        while(is_taken_number(self.list, self.fan, element.grp)):
+            self.fan += 1
+
+
+
 class StructuralModel:
     
     
