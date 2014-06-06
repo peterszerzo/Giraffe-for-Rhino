@@ -5,8 +5,6 @@ Giraffe for Rhino
 
 -> export seamlessly into SOFiSTiK, using its very own syntax for property definitions.
 
--> need to adjust the model? do it directly in Rhino. the updated SOFiSTiK model is one click away!
-
 Use:
 
 1. download and save Giraffe.py
