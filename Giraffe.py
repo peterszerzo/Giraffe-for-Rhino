@@ -37,16 +37,36 @@ line_elements = ["beam", "trus", "cabl"]
 
 area_elements = ["quad"]
 
+dictionary = {
+    "nodes": "node", 
+    "beams": "beam", 
+    "trusses": "trus", 
+    "cables": "cabl", 
+    "springs": "spri",
+    "quads": "quad"
+}
+
+unit_system = rs.UnitSystem()
+
+unit_conversion = {
+    2: 0.001,
+    3: 0.01,
+    4: 1.0,
+    8: 0.0254,
+    9: 0.3048
+}
+
+k = unit_conversion[unit_system]
+
+error_list = {
+    
+    1: "$ Same name assigned to multiple elements: node 15 at [0, 0, 0] and [1, 0, 0].",
+    
+}
+
 def english_to_sofi(word):
     
-    dictionary = {
-        "nodes": "node", 
-        "beams": "beam", 
-        "trusses": "trus", 
-        "cables": "cabl", 
-        "springs": "spri",
-        "quads": "quad"
-    }
+    
     
     return dictionary[word]
 
@@ -60,6 +80,13 @@ def is_taken_number(array, no, grp):
                 return True	
                 
     return False
+
+
+def round(f, n = 3):
+    
+    a = 10 ** n
+    
+    return int(f * a) / a
 
 
 
@@ -80,6 +107,7 @@ class Description:
         
         self.no = -1
         self.prop = ""
+        self.name = ""
         
         s = s.strip()
         
@@ -88,8 +116,23 @@ class Description:
             i1 = s.find("[")
             i2 = s.find("]")
             
-            if (i1 == -1 or i2 == -1):
+            j1 = s.find("{")
+            j2 = s.find("}")
+            
+            if (i1 == -1):
                 
+                i = j1
+                
+            elif (j1 == -1):
+                
+                i = i1
+                
+            else:
+                
+                i = min(i1, j1)
+            
+            if (i == -1):
+            
                 if (not s[0] in number_characters):
                     
                     self.prop = s
@@ -100,9 +143,14 @@ class Description:
                 
             else:
             
-                no_string = s[0:(i1)].strip()	
+                no_string = s[0:(i)].strip()	
                 self.no = (-1) if (no_string == "") else int(no_string)
-                self.prop = s[(i1 + 1):(i2)]
+                
+                if (i1 != -1):
+                    self.prop = s[(i1 + 1):(i2)]
+                
+                if (j1 != -1):
+                    self.name = s[(j1 + 1):(j2)]
 
 
 
@@ -131,9 +179,9 @@ class Node(StructuralElement):
     def __init__(self, no = -1, x = 0, y = 0, z = 0, prop = ""):
         
         StructuralElement.__init__(self, "node", no, prop)
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = round(+ x * k, 5)
+        self.y = round(+ y * k, 5)
+        self.z = round(- z * k, 5)
 		
 		
     def build_from_point(self, obj):
@@ -141,9 +189,9 @@ class Node(StructuralElement):
         attr = Description(rs.ObjectName(obj))
         coordinates = rs.PointCoordinates(obj)
         self.no = attr.no
-        self.x = coordinates[0]
-        self.y = coordinates[1]
-        self.z = coordinates[2]
+        self.x = round(+ coordinates[0] * k, 5)
+        self.y = round(+ coordinates[1] * k, 5)
+        self.z = round(- coordinates[2] * k, 5)
         self.prop = attr.prop
 		
 		
@@ -159,7 +207,9 @@ class Node(StructuralElement):
         
     def distance_to(self, n):
         
-        return ( (self.x - n.x) ** 2 + (self.y - n.y) ** 2 + (self.z - n.z) ** 2 ) ** 0.5
+        d = ( (self.x - n.x) ** 2 + (self.y - n.y) ** 2 + (self.z - n.z) ** 2 ) ** 0.5
+        
+        return d
         
         
     def identical_to(self, n):
@@ -168,7 +218,7 @@ class Node(StructuralElement):
 
 
 
-class Member(StructuralElement):	
+class Member(StructuralElement):
 
 
     def __init__(self, typ, grp, no, na, ne, prop):
@@ -176,6 +226,7 @@ class Member(StructuralElement):
         StructuralElement.__init__(self, typ, no, prop, grp)
         self.na = na
         self.ne = ne
+        self.length = 0
         
         
     def export(self):
@@ -183,9 +234,21 @@ class Member(StructuralElement):
         output = self.output_base()
         output += " na " + str(self.na)
         output += " ne " + str(self.ne)
-        output += " " + self.prop + "\n"
+        output += " " + self.prop
+        output += " $ l = " + str(self.length) + " [m]\n"
         
         return output
+        
+        
+    def export_glass_load(self):
+        
+        l = str(self.length)
+        output = "$ " + str(self.grp) + "\n"
+        output += "bepl " + str(self.grp * 1000 + self.no) + " type pzz p 24*$(t)/1000*" + l + "/2*$(H)*$(FTtoM) a " + "#a" + "\n"
+        output += "bepl " + str(self.grp * 1000 + self.no) + " type pzz p 24*$(t)/1000*" + l + "/2*$(H)*$(FTtoM) a " + l + "-#a" + "\n\n"
+        
+        return output
+        
 
 
 
@@ -239,7 +302,9 @@ class StructuralModel:
         
         self.nodes = ElementList()
         self.members = ElementList()         
-        self.quads = ElementList()  
+        self.quads = ElementList()
+        
+        self.glass_load_groups = []
         
         self.gdiv = 1000
         self.current_group = -1
@@ -251,6 +316,10 @@ class StructuralModel:
         self.output_quads = "\n\n!*!Label Area Elements\n"
         self.output_footer = "\nend"
         self.output = ""
+        
+        self.output_glass_load = ""
+        
+        self.export_message = "\n$ Export successful. No errors or warnings.\n"
 
 			
     def add_node(self, n):
@@ -287,6 +356,17 @@ class StructuralModel:
         pa = rs.CurveStartPoint(element)
         pe = rs.CurveEndPoint(element)
         
+        s = 0.1
+        pb = [
+            pa[0] * (1 - s) + pe[0] * s, 
+            pa[1] * (1 - s) + pe[1] * s, 
+            pa[2] * (1 - s) + pe[2] * s, 
+        ]
+        
+        rs.AddPoint(pb)
+        
+        length = round(((pa[0] - pe[0]) ** 2 + (pa[1] - pe[1]) ** 2 + (pa[2] - pe[2]) ** 2) ** 0.5 * k)
+        
         node_a = self.add_node(Node(-1, pa[0], pa[1], pa[2], ""))
         node_e = self.add_node(Node(-1, pe[0], pe[1], pe[2], ""))
         
@@ -306,8 +386,13 @@ class StructuralModel:
                     
         e = Member(element_type, self.current_group, attr.no, node_a.no, node_e.no, attr.prop)
         
+        e.length = length
+        
         self.members.list.append(e)
         self.output_members += e.export()
+        
+        if (self.current_group in self.glass_load_groups):
+            self.output_glass_load += e.export_glass_load()
         
         self.members.update_fan(self.current_group)
 	
@@ -357,22 +442,41 @@ class StructuralModel:
 		
     def export(self):
         
+        self.output_header += self.export_message
         self.export_nodes()
         return self.output_header + self.output_nodes + self.output_members + self.output_quads + self.output_footer
         
     
     def make_file(self):
         
-        f = open("system.dat", "w")
+        path = rs.DocumentPath()
+        
+        i = path.rfind("\\")
+        
+        path = path[:i]
+        
+        f = open(path + "\system.dat", "w")
         
         f.write(self.export())
 		
         f.close()
+        
+        #f = open(path + "\glass_load.dat", "w")
+        
+        #f.write(self.output_glass_load)
+		
+        #f.close()
 		
 
 def Main():
     
+    rs.CurrentLayer("output::startpoints")
+    objects = rs.ObjectsByLayer("output::startpoints")
+    for obj in objects:
+        rs.DeleteObject(obj)
+    
     sofi = StructuralModel("some structure")
+    sofi.glass_load_groups = [1, 2, 3, 4]
     layer_names = rs.LayerNames()	
     
     for name in layer_names:
@@ -391,6 +495,7 @@ def Main():
                 if (layer.depth == 3):
                     
                     sofi.current_group = attr.no
+                    sofi.output_members += "\n\n!*!Label G" + str(sofi.current_group) + " (" + element_type + ") " + attr.name + "\n"
                     sofi.output_members += "\ngrp " + str(sofi.current_group) + "\n"
                 
                 if (prop != ""):
@@ -419,9 +524,13 @@ def Main():
                 sofi.quads.update_fan(sofi.current_group)
                 
                 objects = rs.ObjectsByLayer(layer.name)[::-1]
+                
                 for obj in objects:
+                    
                     sofi.add_quad(obj)
                     
     sofi.make_file()
-        
+    
+    rs.CurrentLayer("input")
+    
 Main()
