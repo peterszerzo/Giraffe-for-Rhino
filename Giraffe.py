@@ -66,8 +66,6 @@ error_list = {
 
 def english_to_sofi(word):
     
-    
-    
     return dictionary[word]
 
 
@@ -99,7 +97,36 @@ class Layer:
         self.depth = len(self.path)
         self.last = self.path[self.depth - 1]
         
+        return self
+        
+    def create(self):
 
+        if (not rs.IsLayer(self.name)):
+            rs.AddLayer(self.name)
+            
+        return self  
+        
+    def create2(self):
+    
+        dad = ""
+        for s in self.path:
+            son = s if (dad == "") else (dad + "::" + s)
+            daddy = None if dad == "" else dad
+            if(not rs.IsLayer(son)):
+                rs.AddLayer(s, color = None, visible = True, locked = False, parent = daddy)      
+            dad = son
+            
+        return self    
+            
+    def clear(self):
+    
+        objects = rs.ObjectsByLayer(self.name)
+        for obj in objects:
+            rs.DeleteObject(obj) 
+            
+        return self   
+            
+    
 
 class Description:
     
@@ -470,10 +497,7 @@ class StructuralModel:
 
 def Main():
     
-    rs.CurrentLayer("output::startpoints")
-    objects = rs.ObjectsByLayer("output::startpoints")
-    for obj in objects:
-        rs.DeleteObject(obj)
+    sp = Layer("output::startpoints").create2().clear()
     
     sofi = StructuralModel("some structure")
     sofi.glass_load_groups = [1, 2, 3, 4]
