@@ -6,39 +6,8 @@ syst init gdiv 1000
 
 
 !*!Label Nodes
-node no 1 x -12.0 y -2.0 z 0.0 
-node no 2 x 12.0 y 9.0 z 0.0 
-node no 3 x -5.0 y -8.0 z 0.0 
-node no 4 x 19.0 y -13.0 z 0.0 
-node no 5 x 1.0 y 17.0 z 0.0 
-node no 6 x 30.0 y 22.0 z 0.0 
-node no 7 x 12.0 y 3.0 z 0.0 
-node no 8 x 32.0 y 8.0 z 0.0 
+node no 1 x 0.012 y 0.009 z 0.0 $ alma
+node no 2 x -0.012 y -0.002 z 0.0 
 
-
-
-!*!Label Line Members
-
-grp 10
-
-trus prop ncs 10
-
-grp 1
-
-beam prop ncs 1
-beam no 1 na 3 ne 4 
-beam no 2 na 1 ne 2 
-
-grp 2
-
-beam prop ncs 2 drot 90
-
-beam prop ncs 2 drot 0
-
-grp 10
-
-
-!*!Label Area Elements
-quad no 1 n1 5 n2 6 n3 8 n4 7 
 
 end
