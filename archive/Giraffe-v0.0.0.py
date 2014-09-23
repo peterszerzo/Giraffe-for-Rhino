@@ -1,7 +1,10 @@
 """
 
-Giraffe for Rhino
-    developed and maintained by Peter Szerzo
+Giraffe for Rhino, v0.0.0
+Peter Szerzo
+
+NOTE
+This is a draft version used for proof of concept.
 
 Imports wireframe geometry as structural model into SOFiSTiK.
 Giraffe organizes structural information using through a strict layer structure:

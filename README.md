@@ -1,9 +1,11 @@
 Giraffe for Rhino
 ============================
 
--> create geometry containing all structural information, without leaving the comfort of Rhino.
+-> create geometry containing all structural information, without leaving the comfort of Rhinoceros.
 
 -> export seamlessly into SOFiSTiK, using its very own syntax for property definitions.
+
+-> update and organize all properties, sections, hinges graphically. As one is supposed to.
 
 Use:
 

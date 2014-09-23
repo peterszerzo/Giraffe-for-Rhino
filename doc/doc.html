@@ -3,41 +3,55 @@
 
 	<head>
 		<title>Giraffe</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 
 	<body>
 
-		<h1>Giraffe Guide</h1>
+		<div class="wrapper">
 
-		<h2>Abstract</h2>
-		<p>Imports wireframe geometry as structural model into SOFiSTiK.</p>
+			<h1>Giraffe Guide</h1>
 
-		<h2>The Layer Structure</h2>
-		<p>Giraffe organizes structural information using a strict layer structure:<p>
-		<ul>
-			<li>all input geometry in a main 'input' layer</li>
-			<li>1st children layers: 'nodes', 'beams', 'trusses', 'cables', 'springs'</li>
-			<li>2nd children layers: ' //group number// [ //layer properties// ] { //layer description// }' format</li>
-				
+			<h2>Abstract</h2>
+			<p>Imports wireframe geometry as structural model into SOFiSTiK.</p>
 
-			<li>3rd children layers: '{properties}'</li>
-				
-		</ul>
+			<h2>The Layer Structure</h2>
 
-		<h3>example</h3>
-		    a layer 
-		            2 [ncs 2 ahin mymz] {main facade girders}'
-		          within 'beams' layer will produce statement:
-		            !#!Label grp 2 - main facade girders
-		            beam prop ncs 2 ahin mymz
+			<p>Giraffe organizes structural information using a strict layer structure:</p>
 
-				rules:
-					leading and trailing whitespaces allowed
-					group number is mandatory
-					layer properties may be omitted, including square brackets
+			<ul>
 
-		<h2>Custom Properties</h2>
-		<p>Adding properties to structural elements.</p>
+				<li>all input geometry in a main 'input' layer</li>
+				<li>1st children layers: 'nodes', 'beams', 'trusses', 'cables', 'springs'</li>
+				<li>2nd children layers: ' // group number // [ // structural properties // ] { // description // }' format</li>
+					
+
+				<li>3rd, 4th etc. children layers: '// structural properties // { // description // }'</li>
+					
+			</ul>
+
+			<p>Layers can be nested infinitely. Note that structural properties should only be in square brackets if the a group number is not specified. In fact, Rhino does not allow layer names to start with square brackets.</p>
+
+			<p>The nodes sublayer should not have further sublayers.</p>
+
+			<h3>example</h3>
+			<p>layer: 2 [ncs 5 ahin mymz] {main facade girders}
+			<p>within 'beams' layer will produce statement:</p>
+			<p>!#!Label grp 2 - main facade girders</p>
+			<p>beam prop ncs 5 ahin mymz</p>
+
+			<p>rules:</p>
+			<ul>
+				<li>leading and trailing whitespaces allowed</li>
+				<li>group number is mandatory</li>
+				<li>layer properties may be omitted, including square brackets</li>
+			</ul>
+						
+
+			<h2>Custom Properties</h2>
+			<p>By adding custom names to structural elements, their properties may be modified.</p>
+
+		</div>
 
 	</body>
 

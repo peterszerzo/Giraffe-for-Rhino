@@ -82,10 +82,10 @@ class GiraffeLayer():
 class StructuralElement:
 
 
-    def __init__(self, typ, geo, grp = -1):
+    def __init__(self, geo, typ, grp = -1):
         
-        self.typ = typ
         self.geo = geo
+        self.typ = typ
 
         self.grp = grp
 
@@ -100,14 +100,16 @@ class StructuralElement:
 
     def build_base(self):
 
-        attr = ri.RhinoInput(rs.ObjectName(self.geo))
+        if (self.geo):
 
-        self.no = attr.get_no()
-        if (self.no != -1):
-            self.strict_naming = True
+            attr = ri.RhinoInput(rs.ObjectName(self.geo))
 
-        self.name = attr.get_name()
-        self.prop = attr.get_prop()
+            self.no = attr.get_no()
+            if (self.no != -1):
+                self.strict_naming = True
+
+            self.name = attr.get_name()
+            self.prop = attr.get_prop()
         
 
     def output_base(self):
@@ -119,15 +121,17 @@ class StructuralElement:
 class Node(StructuralElement):
     
     
-    def __init__(self, obj):
+    def __init__(self, obj, coordinates = None):
         
-        StructuralElement.__init__(self, "node", obj)
-        self.build()
+        StructuralElement.__init__(self, obj, "node")
+        self.build(coordinates)
         
         
-    def build(self):
+    def build(self, coordinates = None):
 
-        coordinates = rs.PointCoordinates(self.geo)
+        if (self.geo):
+            coordinates = rs.PointCoordinates(self.geo)
+
         self.x = round(+ coordinates[0], 5)
         self.y = round(+ coordinates[1], 5)
         self.z = round(+ coordinates[2], 5)
@@ -163,9 +167,11 @@ class Node(StructuralElement):
 class LineElement(StructuralElement):
 
 
-    def __init__(self, obj, type):
+    def __init__(self, obj, typ):
 
-        StructuralElement.__init__(self, type, obj)
+        StructuralElement.__init__(self, obj, typ)
+        self.n1 = None
+        self.n2 = None
 
 
     def build(self):
@@ -175,12 +181,12 @@ class LineElement(StructuralElement):
 
     def identical_to(self, elem):
 
-        return False
+        return (self.n1 == elem.n1) and (self.n2 == elem.n2)
 
 
     def export(self):
 
-        return True
+        return "beam no " + str(self.no) + " na " + str(self.n1.no) + " ne " + str(self.n2.no)
 
 
 
@@ -194,7 +200,7 @@ class ElementList:
         self._errors = []
         
 
-    def contains(self, element):
+    def get_identical_to(self, element):
 
         already_in_list = False
         
@@ -202,9 +208,9 @@ class ElementList:
 
             if element.identical_to(item):
 
-                already_in_list = True
+                return item
 
-        return already_in_list
+        return None
 
 
     def is_taken_number(self, number, grp = -1):
@@ -262,9 +268,16 @@ class ElementList:
             self._errors.append("Numbering conflict, node number " + str(existing_element.no) + " changed to " + str(new_element.no) + ".")
 
 
+    # return new element if added; return identical element if not added
     def add(self, new_element):
         
-        if(not self.contains(new_element)):
+        identical = self.get_identical_to(new_element)
+
+        if(identical):
+
+            return identical
+
+        else:
 
             if(new_element.no == -1):
 
@@ -274,11 +287,13 @@ class ElementList:
 
                 conflict = self.get_conflicting_element(new_element)
 
-                if (not conflict is None):
+                if (conflict):
 
                     self.resolve_numbering_conflict(conflict, new_element)
             
-            self._list.append(new_element)     
+            self._list.append(new_element)
+
+            return new_element
 
 
     def export(self):
@@ -328,6 +343,7 @@ class StructuralModel:
         self.name = name    
         
         self.nodes = ElementList("Nodes")
+        self.beams = ElementList("Beams")
                 
         self.gdiv = 1000
         self.current_group = -1
@@ -359,10 +375,22 @@ class StructuralModel:
 
                     self.nodes.add(n)
 
+            if(layer.path[1] == "beams"):
+
+                for obj in objects:
+
+                    bm = LineElement(obj, "beam")
+
+                    # there is no Guid from Rhino associated with these points
+                    bm.n1 = self.nodes.add(Node(None, rs.CurveStartPoint(obj)))
+                    bm.n2 = self.nodes.add(Node(None, rs.CurveEndPoint(obj)))
+
+                    self.beams.add(bm)
+
 
     def export(self):
         
-        return self.output_header + self.nodes.export() + self.output_footer
+        return self.output_header + self.nodes.export() + self.beams.export() + self.output_footer
 
 
     def make_file(self):
