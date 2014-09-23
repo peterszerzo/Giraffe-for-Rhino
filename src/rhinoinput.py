@@ -1,17 +1,24 @@
 class RhinoInput():
-    
+
+
     def __init__(self, s):
         
         self.string = s.strip()
 
-    def get_no(self):
 
-        i1 = self.string.find("[")
-        i2 = self.string.find("{")
+    def has_number(self):
+
+        return self.get_before("[", "{").strip().isdigit()
+
+
+    def get_before(self, char1, char2):
+
+        i1 = self.string.find(char1)
+        i2 = self.string.find(char2)
 
         if ((i1 == -1) and (i2 == -1)):
 
-            return int(self.string)
+            return self.string
 
         if ((i1 == -1) or (i2 == -1)):
 
@@ -21,28 +28,45 @@ class RhinoInput():
 
             j = min(i1, i2)
 
-        no_string = self.string[0:j].strip()
+        return self.string[0:j]
 
-        return int(no_string)
+
+    def get_between(self, char1, char2):
+
+        i1 = self.string.find(char1)
+        i2 = self.string.find(char2)
+
+        if ((i1 != -1) and (i2 != -1) and (i2 > i1)):
+
+            return self.string[(i1 + 1):(i2)]
+
+        return ""
+
+
+    def get_no(self):
+
+        if (self.has_number()):
+
+            return int(self.get_before("[", "{").strip())
+
+        return -1        
+
 
     def get_prop(self):
 
-        i1 = self.string.find("[")
-        i2 = self.string.find("]")
+        between_square_brackets = self.get_between("[", "]").strip()
 
-        if ((i1 != -1) and (i2 != -1) and (i2 > i1)):
+        if (self.has_number()):
 
-            return self.string[(i1 + 1):(i2)].strip()
+            return between_square_brackets
 
-        return ""
+        elif (between_square_brackets == ""):
+
+            return self.get_before("{", "{").strip()
+
+        return between_square_brackets
+
 
     def get_name(self):
 
-        i1 = self.string.find("{")
-        i2 = self.string.find("}")
-
-        if ((i1 != -1) and (i2 != -1) and (i2 > i1)):
-            
-            return self.string[(i1 + 1):(i2)].strip()
-
-        return ""
+        return self.get_between("{", "}").strip()
