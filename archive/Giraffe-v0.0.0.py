@@ -583,6 +583,7 @@ def Main():
     
     layers = []
     
+    
     for layer_name in layer_names:
     
         layers.append(Layer(layer_name))
