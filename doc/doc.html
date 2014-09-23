@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>Giraffe</title>
+	</head>
+
+	<body>
+
+		<h1>Giraffe Guide</h1>
+
+		<h2>Abstract</h2>
+		<p>Imports wireframe geometry as structural model into SOFiSTiK.</p>
+
+		<h2>The Layer Structure</h2>
+		<p>Giraffe organizes structural information using a strict layer structure:<p>
+		<ul>
+			<li>all input geometry in a main 'input' layer</li>
+			<li>1st children layers: 'nodes', 'beams', 'trusses', 'cables', 'springs'</li>
+			<li>2nd children layers: ' //group number// [ //layer properties// ] { //layer description// }' format</li>
+				
+
+			<li>3rd children layers: '{properties}'</li>
+				
+		<ul>
+
+		<h3>example</h3>
+		    a layer 
+		            2 [ncs 2 ahin mymz] {main facade girders}'
+		          within 'beams' layer will produce statement:
+		            !#!Label grp 2 - main facade girders
+		            beam prop ncs 2 ahin mymz
+
+				rules:
+					leading and trailing whitespaces allowed
+					group number is mandatory
+					layer properties may be omitted, including square brackets
+
+		<h2>Custom Properties</h2>
+		<p>Adding properties to structural elements.</p>
+
+	</body>
+
+</html>

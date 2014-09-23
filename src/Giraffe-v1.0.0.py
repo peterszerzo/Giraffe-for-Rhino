@@ -3,31 +3,12 @@
 Giraffe for Rhino
     developed and maintained by Peter Szerzo
 
-Imports wireframe geometry as structural model into SOFiSTiK.
-Giraffe organizes structural information using through a strict layer structure:
-	- all input geometry in a main 'input' layer
-	- 1st children: 'nodes', 'beams', 'trusses', 'cables', 'springs'
-	- 2nd children: '{group number} [{layer properties}]'
-		e.g. '2 [ncs 2 ahin mymz]' 
-		rules:
-			white spaces allowed
-			group number is mandatory
-			layer properties may be omitted, including square brackets
-	- 3rd children: '{properties}'
-		e.g. 'ncs 3 ahin n'
-		rules:
-			no square brackets this time (layer names cannot start with square brackets)
-			no group numbers
-			
-	each element may be named in '{element number} [{element properties}]' format
-
 """
 
 import rhinoscriptsyntax as rs
-
 import math
-
 import string
+import RhinoInput as ri
 
 number_characters = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
@@ -75,53 +56,6 @@ def round(f, n = 3):
     a = 10 ** n
     
     return int(f * a) / a
-            
-    
-
-class Description:
-    
-    def __init__(self, s):
-        
-        self.string = s.strip()
-
-    def get_prop(self):
-
-        i1 = self.string.find("[")
-        i2 = self.string.find("]")
-
-        if ((i1 != -1) and (i2 != -1) and (i2 > i1)):
-
-            return self.string[(i1 + 1):(i2)]
-
-        return ""
-
-
-    def get_name(self):
-
-        i1 = self.string.find("{")
-        i2 = self.string.find("}")
-
-        if ((i1 != -1) and (i2 != -1) and (i2 > i1)):
-            
-            return self.string[(i1 + 1):(i2)]
-
-        return ""
-
-
-    def get_no(self):
-
-        return -1
-
-        i1 = self.string.find("[")
-        i2 = self.string.find("{")
-
-        if ((i1 == -1) and (i2 == -1)):
-
-            return int(self.string)
-
-        j = i1 if (i2 == -1) else i2
-
-        return int(self.string[0:(j + 1)].strip())
 
 
 class StructuralElement():
@@ -144,7 +78,7 @@ class StructuralElement():
 
     def build_base(self):
 
-        attr = Description(rs.ObjectName(self.geo))
+        attr = ri.RhinoInput(rs.ObjectName(self.geo))
 
         self.no = attr.get_no()
         if (self.no != -1):
