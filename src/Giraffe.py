@@ -3,6 +3,7 @@ Giraffe for Rhino v1.0.0 Beta
 Peter Szerzo
 """
 
+import sys
 import math
 import string
 import rhinoscriptsyntax as rs
@@ -22,12 +23,58 @@ plural_to_sofi = {
 
 line_elements = [ "beams", "trusses", "cables" ]
 
-
 tolerance = 0.1 # how close points have to be to be considered one
+
+
+def get_output_path():
+
+    """Returns output path as 'system.dat' in the directory of the Rhino model (Windows + Mac OS)."""
+
+    path = rs.DocumentPath()
+
+    i = path.rfind("\\")
+
+    platform = sys.platform
+
+    if platform in ["win32, cygwin"]:
+
+        path = path + "system.dat"
+
+    else: #elif (platform in ["darwin", "rlinux2"]):
+
+        path = path[:i-3] + ".dat"
+
+    return path
 
 
 class GiraffeLayer():
     
+
+    endpoints = None
+    dummy = None
+
+
+    @classmethod
+    def setup(self):
+
+        """Sets up layers."""
+
+        # create basic input layer structure if it does not yet exist
+        GiraffeLayer("input::nodes").create()
+        GiraffeLayer("input::beams").create()
+
+        self.dummy = GiraffeLayer("giraffe-dummy").create().unlock().clear().set_color([150, 150, 100])
+        self.endpoints = GiraffeLayer("output::startpoints").create().unlock().clear().set_color([85, 26, 139])
+
+
+    @classmethod
+    def teardown(self):
+
+        """Sets dummy as current layer and locks output."""
+
+        self.dummy.set_current()
+        self.endpoints.lock()
+
 
     @classmethod
     def get_all(self):
@@ -67,6 +114,10 @@ class GiraffeLayer():
           self
         """
 
+        if rs.IsLayer(self.name):
+
+            return self
+
         mom = ""
         
         for s in self.path:
@@ -75,12 +126,38 @@ class GiraffeLayer():
 
             mommy = None if mom == "" else mom
 
-            if(not rs.IsLayer(son)):
+            if not rs.IsLayer(son):
 
                 rs.AddLayer(s, color = None, visible = True, locked = False, parent = mommy)
 
             mom = son
             
+        return self
+
+
+    def set_current(self):
+
+        """Sets layer as current.
+        Returns:
+          self
+        """
+
+        rs.CurrentLayer(self.name)
+
+        return self
+
+
+    def set_color(self, c):
+
+        """Sets layer color.
+        Parameters:
+          c = color as an RGB value array
+        Returns:
+          self
+        """
+
+        rs.LayerColor(self.name, c)
+
         return self
 
 
@@ -107,19 +184,56 @@ class GiraffeLayer():
         return self
 
 
+    def lock(self):
+
+        """Locks layer.
+        Returns:
+          self
+        """
+
+        rs.LayerLocked(self.name, True)
+
+        return self
+
+
+    def unlock(self):
+
+        """Unlocks layer.
+        Returns:
+          self
+        """
+
+        rs.LayerLocked(self.name, False)
+
+        return self
+
+
     def get_grp(self):
 
-        """Returns group number from layer."""
+        """Returns group number from layer; -1 if not specified."""
 
         grp = -1
 
-        if (self.depth > 2):
+        if self.depth > 2:
 
             inp = ri.RhinoInput(self.path[2])
 
             grp = inp.get_no()
 
         return grp
+
+
+    def get_grp_string(self):
+
+        """Returns a string representation of the group number (e.g. 'grp 2')."""
+
+        grp = self.get_grp()
+
+        if grp == -1:
+
+            return ""
+
+        return "grp " + str(grp)
 
 
     def get_name(self):
@@ -133,7 +247,7 @@ class GiraffeLayer():
 
         """Returns structural properties from layer (last child only)."""
 
-        if (self.depth == 2):
+        if self.depth == 2:
 
             return ""
 
@@ -147,32 +261,36 @@ class GiraffeLayer():
         return plural_to_sofi[self.path[1]]
 
 
+    def get_export_header(self):
+
+        """Return export header (SOFiSTiK label)."""
+
+        return "\n\n!*!Label " + plural_to_sofi[self.path[1]] + " " + self.get_grp_string() + " .. " + self.get_name() + "\n"
+
+
     def export(self):
 
         """Returns SOFiSTiK export."""
 
-        name = self.get_name()
-        grp = self.get_grp()
+        name = self.get_name() 
+
         typ = self.get_type()
         prop = self.get_prop()
 
-        grp_string = ""
+        output = self.get_export_header()
 
-        if (grp != -1):
+        grp_string = self.get_grp_string()
 
-            grp_string = "grp " + str(grp)
-
-        output = "\n\n!*!Label " + self.path[1] + " .. " + grp_string + " .. " + self.get_name() + "\n"
-
-        if (grp_string != ""):
+        if grp_string != "":
 
             output += grp_string + "\n"
 
-        if (prop != ""):
+        if prop != "":
 
             output += typ + " prop " + prop + "\n"
 
         return output
+
 
 
 class StructuralElement:
@@ -322,6 +440,28 @@ class LineElement(StructuralElement):
         return True
 
 
+    def get_point_on(self, s):
+
+        """Gets point on element.
+        Parameters:
+          s = curve parameter between 0 (startpoint) and 1 (endpoint).
+        """
+
+        x = self.n1.x * (1 - s) + self.n2.x * s
+        y = self.n1.y * (1 - s) + self.n2.y * s
+        z = self.n1.z * (1 - s) + self.n2.z * s
+
+        return [x, y, z]
+
+
+    def mark_start_point(self):
+
+        """Marks start point by drawing a point in 1/10 the way towards the endpoint."""
+
+        GiraffeLayer.endpoints.set_current()
+        rs.AddPoint(self.get_point_on(0.1))
+
+
     def identical_to(self, elem):
 
         """Returns true for overlapping line elements (identical start- and endnodes)."""
@@ -381,7 +521,7 @@ class ElementList:
 
         for element in self._list:
             
-            if (element.no == number and element.grp == grp):
+            if (element.no == number) and (element.grp == grp):
                 
                 return True
                 
@@ -415,7 +555,7 @@ class ElementList:
 
         for element in self._list:
             
-            if (element.no == new_element.no and element.grp == new_element.grp):
+            if (element.no == new_element.no) and (element.grp == new_element.grp):
                 
                 return element
                 
@@ -440,7 +580,7 @@ class ElementList:
         """
 
         # rule 1: if the element already in the list does not have strict naming, the new element keeps its number
-        if (not existing_element.strict_naming):
+        if not existing_element.strict_naming:
 
             self.add_number(existing_element)
 
@@ -465,13 +605,13 @@ class ElementList:
         
         identical = self.get_identical_to(new_element)
 
-        if(identical):
+        if identical:
 
             return identical
 
         else:
 
-            if(new_element.no == -1):
+            if new_element.no == -1:
 
                 self.add_number(new_element)
 
@@ -479,7 +619,7 @@ class ElementList:
 
                 conflict = self.get_conflicting_element(new_element)
 
-                if (conflict):
+                if conflict:
 
                     self.resolve_numbering_conflict(conflict, new_element)
             
@@ -499,6 +639,7 @@ class ElementList:
             output += "$ " + item + "\n"
 
         current_layer = -1
+        previous_layer = -1
 
         for item in self._list:
             
@@ -506,9 +647,13 @@ class ElementList:
 
             current_layer = item.layer
 
-            if (current_layer and (not previous_layer == current_layer)):
+            if current_layer and (previous_layer != current_layer):
 
                 output += current_layer.export()
+
+            elif (not current_layer) and (previous_layer != current_layer):
+
+                output += "\n\n!*!Label node .. endpoints" + "\n"
 
             output += item.export() + "\n"
             
@@ -530,38 +675,22 @@ class StructuralModel:
     }
     
 
-    """Constructor
-    Parameters:
-      name = model name
-    """
-
     def __init__(self, name):   
+
+        """Constructor
+        Parameters:
+          name = model name
+        """
     
-        self.setup()
+        self.conversion_factor = StructuralModel.unit_conversion[rs.UnitSystem()]
 
         self.name = name    
         
-        self.nodes = ElementList("Nodes")
-        self.beams = ElementList("Beams")
+        self.nodes = ElementList("*** NODES ***")
+        self.beams = ElementList("*** LINE ELEMENTS ***")
                 
         self.gdiv = 1000
         self.current_group = -1
-        
-        self.output_header = "$ generated by Giraffe for Rhino\n"
-        self.output_header += "+prog sofimsha\nhead " + self.name + "\n\nsyst init gdiv 1000\n"
-
-        self.output_header += "\nlet#conversion_factor " + str(self.conversion_factor)
-
-        self.output_footer = "\nend"
-
-        return self
-
-
-    def setup(self):
-
-        """Sets up structural model."""
-
-        self.conversion_factor = StructuralModel.unit_conversion[rs.UnitSystem()]
 
         return self
 
@@ -570,49 +699,75 @@ class StructuralModel:
 
         """Adds objects from a given layer to the ElementLists of the structural model."""
 
-        if (layer.depth > 1 and layer.path[0] == "input"):
+        if (layer.depth > 1) and (layer.path[0] == "input"):
 
             objects = layer.get_geometry()
 
             typ_plural = layer.path[1]
             typ_sofi = plural_to_sofi[typ_plural]
 
-            if (typ_plural == "nodes"):
+            if typ_plural == "nodes":
 
                 for obj in objects:
 
-                    if (rs.ObjectType(obj) == 1):
+                    if rs.ObjectType(obj) == 1:
 
                         n = Node(obj)
                         n.layer = layer
 
                         self.nodes.add(n)
 
-            if (typ_plural in line_elements):
+            if typ_plural in line_elements:
 
                 for obj in objects:
 
-                    if (rs.ObjectType(obj) == 4):
+                    if rs.ObjectType(obj) == 4:
 
                         bm = LineElement(obj, typ_sofi)
-
-                        bm.layer = layer
 
                         # adds beam endpoints to node list, if not already existing
                         # if the node was already defined, self.nodes.add() will return that node
                         bm.n1 = self.nodes.add(Node(None, rs.CurveStartPoint(obj)))
                         bm.n2 = self.nodes.add(Node(None, rs.CurveEndPoint(obj)))
 
+                        bm.mark_start_point()
+                        bm.layer = layer
+
                         self.beams.add(bm)
 
         return self
+
+
+    def build(self):
+
+        """Builds model from current layer structure within the Rhino model."""
+
+        layers = GiraffeLayer.get_all()
+                    
+        for layer in layers:
+
+            self.add_objects_from_layer(layer)
+
+        return self
+
+
+    def get_export_header(self):
+
+        """Returns export header."""
+
+        header = "$ generated by Giraffe for Rhino\n"
+        header += "+prog sofimsha\nhead " + self.name + "\n\nsyst init gdiv 1000\n"
+
+        header += "\nlet#conversion_factor " + str(self.conversion_factor)
+
+        return header
 
 
     def export(self):
 
         """Returns SOFiSTiK export."""
         
-        return self.output_header + self.nodes.export() + self.beams.export() + self.output_footer
+        return self.get_export_header() + self.nodes.export() + self.beams.export() + "end"
 
 
     def make_file(self):
@@ -622,13 +777,7 @@ class StructuralModel:
           self
         """
 
-        path = rs.DocumentPath()
-
-        i = path.rfind("\\")
-
-        path = path[:i-3]
-        
-        f = open(path + ".dat", "w")
+        f = open(get_output_path(), "w")
         
         f.write(self.export())
         
@@ -640,14 +789,10 @@ class StructuralModel:
 
 def Main():
     
-    sofi = StructuralModel("structure")
+    GiraffeLayer.setup()
 
-    layers = GiraffeLayer.get_all()
-                    
-    for layer in layers:
+    sofi = StructuralModel("structure").build().make_file()
 
-        sofi.add_objects_from_layer(layer)
-                    
-    sofi.make_file()
+    GiraffeLayer.teardown()
     
 Main()

@@ -74,17 +74,21 @@ class RhinoInput():
 
         """Returns property."""
 
-        between_square_brackets = self.get_between("[", "]").strip()
+        prop_default = self.get_between("[", "]").strip()
 
-        if (self.has_number()):
+        if self.has_number():
 
-            return between_square_brackets
+            return prop_default
 
-        elif (between_square_brackets == ""):
+        if prop_default == "":
 
             return self.get_before("{", "{").strip()
 
-        return between_square_brackets
+        if prop_default == "#":
+
+            return ""
+
+        return prop_default
 
 
     def get_name(self):
