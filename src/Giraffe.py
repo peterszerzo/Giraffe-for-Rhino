@@ -1,8 +1,6 @@
 """
-
 Giraffe for Rhino v1.0.0 Beta
 Peter Szerzo
-
 """
 
 import math
@@ -10,7 +8,20 @@ import string
 import rhinoscriptsyntax as rs
 import rhinoinput as ri
 
-point_elements = ["node"]
+
+plural_to_sofi = {
+
+    "nodes": "node", 
+    "beams": "beam", 
+    "trusses": "trus", 
+    "cables": "cabl", 
+    "springs": "spri",
+    "quads": "quad"
+
+}
+
+line_elements = [ "beams", "trusses", "cables" ]
+
 
 tolerance = 0.1 # how close points have to be to be considered one
 
@@ -20,6 +31,8 @@ class GiraffeLayer():
 
     @classmethod
     def get_all(self):
+
+        """Returns a list of all layers as GiraffeLayer objects."""
 
         layer_names = rs.LayerNames()
 
@@ -33,6 +46,11 @@ class GiraffeLayer():
 
 
     def __init__(self, name):
+
+        """Constructor.
+        Parameters:
+          name = object name
+        """
         
         self.name = name
         self.path = name.split("::")
@@ -44,9 +62,13 @@ class GiraffeLayer():
 
     def create(self):
     
+        """Creates layer within Rhino, including all ancestors.
+        Returns:
+          self
+        """
+
         mom = ""
         
-        # create all ancestor layers if not yet created
         for s in self.path:
             
             son = s if (mom == "") else (mom + "::" + s)
@@ -59,17 +81,24 @@ class GiraffeLayer():
 
             mom = son
             
-        return self    
+        return self
 
 
     def get_geometry(self):
+
+        """Returns geometry from a given layer as a list. Sublayer objects are not included."""
 
         return rs.ObjectsByLayer(self.name)
 
 
     def clear(self):
+
+        """Deletes all objects from a given layer. Sublayer objects are kept.
+        Returns:
+          self
+        """
     
-        objects = rs.ObjectsByLayer(self.name)
+        objects = self.get_geometry()
 
         for obj in objects:
 
@@ -78,11 +107,85 @@ class GiraffeLayer():
         return self
 
 
+    def get_grp(self):
+
+        """Returns group number from layer."""
+
+        grp = -1
+
+        if (self.depth > 2):
+
+            inp = ri.RhinoInput(self.path[2])
+
+            grp = inp.get_no()
+
+        return grp
+
+
+    def get_name(self):
+
+        """Returns group name from layer (last child only)."""
+
+        return ri.RhinoInput(self.last).get_name()
+
+
+    def get_prop(self):
+
+        """Returns structural properties from layer (last child only)."""
+
+        if (self.depth == 2):
+
+            return ""
+
+        return ri.RhinoInput(self.last).get_prop()
+
+
+    def get_type(self):
+
+        """Returns element type."""
+
+        return plural_to_sofi[self.path[1]]
+
+
+    def export(self):
+
+        """Returns SOFiSTiK export."""
+
+        name = self.get_name()
+        grp = self.get_grp()
+        typ = self.get_type()
+        prop = self.get_prop()
+
+        grp_string = ""
+
+        if (grp != -1):
+
+            grp_string = "grp " + str(grp)
+
+        output = "\n\n!*!Label " + self.path[1] + " .. " + grp_string + " .. " + self.get_name() + "\n"
+
+        if (grp_string != ""):
+
+            output += grp_string + "\n"
+
+        if (prop != ""):
+
+            output += typ + " prop " + prop + "\n"
+
+        return output
+
 
 class StructuralElement:
 
 
     def __init__(self, geo, typ, grp = -1):
+
+        """Constructor.
+        Parameters:
+          geo = Guid from Rhino; None if it does not exist (e.g. line endpoints)
+          typ = object type
+          grp = group number
+        """
         
         self.geo = geo
         self.typ = typ
@@ -95,11 +198,18 @@ class StructuralElement:
         self.name = ""
         self.strict_naming = False
 
+        # reference to containing layer
+        self.layer = None
+
         self.build_base()
 
 
     def build_base(self):
 
+        """Sets element attributes based on Guid name from Rhino."""
+
+        # start- and endpoints of lines are nodes, but they do not need to have a point object associated to them
+        # in this case, self.geo is None and the no, prop and name attributes stay as the default values set in the constructor
         if (self.geo):
 
             attr = ri.RhinoInput(rs.ObjectName(self.geo))
@@ -112,7 +222,9 @@ class StructuralElement:
             self.prop = attr.get_prop()
         
 
-    def output_base(self):
+    def export_base(self):
+
+        """SOFiSTiK export common to all elements."""
     
         return (self.typ + " no " + str(self.no))
 
@@ -120,8 +232,14 @@ class StructuralElement:
 
 class Node(StructuralElement):
     
-    
+
     def __init__(self, obj, coordinates = None):
+
+        """Constructor.
+        Parameters:
+          obj = Guid from Rhino
+          coordinates = if there is no Guid, coordinates should be set
+        """
         
         StructuralElement.__init__(self, obj, "node")
         self.build(coordinates)
@@ -129,6 +247,13 @@ class Node(StructuralElement):
         
     def build(self, coordinates = None):
 
+        """Build node from Rhino Guid or coordinates, whichever is set.
+        Parameters:
+          coordinates = coordinate array passed from constructor
+        """
+
+        # start- and endpoints of lines are nodes, but they do not need to have a point object associated to them
+        # in this case, point coordinates should be set
         if (self.geo):
             coordinates = rs.PointCoordinates(self.geo)
 
@@ -139,26 +264,40 @@ class Node(StructuralElement):
 
     def distance_to(self, n):
         
+        """Returns distance to specified node.
+        Parameters:
+          n = node to which distance is evaluated
+        Returns:
+          distance to n
+        """
+
         d = ( (self.x - n.x) ** 2 + (self.y - n.y) ** 2 + (self.z - n.z) ** 2 ) ** 0.5
         
         return d
         
         
     def identical_to(self, n):
+
+        """Returns True if node overlaps with specified node (distance smaller than tolerance)."""
         
         return (self.distance_to(n) < tolerance)
 
 
+    def export_coordinates(self):
+
+        """Returns coordinate export."""
+
+        return "x " + str(self.x) + "*#conversion_factor" + " y " + str(self.y) + "*#conversion_factor" + " z " + str(self.z) + "*#conversion_factor"
+
+
     def export(self):
         
-        output = self.output_base()
-        output += " x " + str(self.x) + "*#conversion_factor"
-        output += " y " + str(self.y) + "*#conversion_factor"
-        output += " z " + str(self.z) + "*#conversion_factor"
-        output += " " + self.prop
+        """Returns SOFiSTiK export."""
+
+        output = self.export_base() + " " + self.export_coordinates() + " " + self.prop
+
         if (self.name != ""):
             output += "$ " + self.name
-        output += "\n"
 
         return output
 
@@ -169,6 +308,8 @@ class LineElement(StructuralElement):
 
     def __init__(self, obj, typ):
 
+        """Constructor."""
+
         StructuralElement.__init__(self, obj, typ)
         self.n1 = None
         self.n2 = None
@@ -176,17 +317,28 @@ class LineElement(StructuralElement):
 
     def build(self):
 
+        """Placeholder for a method analogous to Node.build()."""
+
         return True
 
 
     def identical_to(self, elem):
+
+        """Returns true for overlapping line elements (identical start- and endnodes)."""
 
         return (self.n1 == elem.n1) and (self.n2 == elem.n2)
 
 
     def export(self):
 
-        return "beam no " + str(self.no) + " na " + str(self.n1.no) + " ne " + str(self.n2.no)
+        """Returns SOFiSTiK export."""
+
+        output = self.export_base() + " na " + str(self.n1.no) + " ne " + str(self.n2.no) + " " + self.prop
+
+        if (self.name != ""):
+            output += "$ " + self.name
+
+        return output
 
 
 
@@ -194,6 +346,8 @@ class ElementList:
 
 
     def __init__(self, name):
+
+        """Constructor."""
         
         self.name = name
         self._list = []
@@ -201,6 +355,8 @@ class ElementList:
         
 
     def get_identical_to(self, element):
+
+        """Returns first element in the list that is identical to the specified element. Returns None if none found."""
 
         already_in_list = False
         
@@ -215,6 +371,14 @@ class ElementList:
 
     def is_taken_number(self, number, grp = -1):
         
+        """Returns True if a number if taken in a given group.
+        Parameters:
+          number = element number
+          grp = group number
+        Returns:
+          whether the given number/group combination is already taken
+        """
+
         for element in self._list:
             
             if (element.no == number and element.grp == grp):
@@ -224,7 +388,30 @@ class ElementList:
         return False
 
 
+    def get_available_number(self, grp = -1):
+    
+        """Returns lowest available number for a given group in the list.
+        Parameters:
+          grp = group number
+        """
+
+        number = 1
+
+        while(self.is_taken_number(number, grp)):
+            
+            number += 1
+
+        return number    
+
+
     def get_conflicting_element(self, new_element):
+
+        """Returns element with a numbering conflict.
+        Parameters:
+          new_element
+        Returns:
+          conflicting element
+        """
 
         for element in self._list:
             
@@ -235,41 +422,46 @@ class ElementList:
         return None
 
 
-    def get_available_number(self, grp = -1):
-    
-        number = 1
-
-        while(self.is_taken_number(number, grp)):
-            
-            number += 1
-
-        return number
-
-
-    # add first available number to any element
     def add_number(self, element):
+
+        """Add first available number to any element."""
 
         element.no = self.get_available_number(element.grp)
 
-
-    # if there is a numbering conflict, resolve using the following rules:
-    #   -> if the element already in the list does not have strict naming, the new element keeps its number
-    #   -> if both conflicting elements have strict naming, the old element keeps its number. warning thrown 
+ 
     def resolve_numbering_conflict(self, existing_element, new_element):
 
+        """Resolves numbering conflict between two elements based on specified rules.
+        Parameters:
+          existing_element = element already in list
+          new_element = element to be inserted into the list
+        Returns:
+          self
+        """
+
+        # rule 1: if the element already in the list does not have strict naming, the new element keeps its number
         if (not existing_element.strict_naming):
 
             self.add_number(existing_element)
 
+        # rule 2: if both conflicting elements have strict naming, the old element keeps its number; warning thrown
         else:
 
             self.add_number(new_element)
 
             self._errors.append("Numbering conflict, node number " + str(existing_element.no) + " changed to " + str(new_element.no) + ".")
 
+        return self
 
-    # return new element if added; return identical element if not added
+
     def add(self, new_element):
+
+        """
+        Adds new element to the list.
+        If identical element is found in the list, the method returns that element and does not add the new one.
+        If the new element has a -1 number (not specified), a new number is assigned.
+        If the new element has a number, potential numbering conflicts are resolved.
+        """
         
         identical = self.get_identical_to(new_element)
 
@@ -298,15 +490,27 @@ class ElementList:
 
     def export(self):
 
-        output = "\n\n!*!Label " + self.name + "\n"
+        """Returns SOFiSTiK export."""
+
+        output = ""
 
         for item in self._errors:
             
             output += "$ " + item + "\n"
 
+        current_layer = -1
+
         for item in self._list:
             
-            output += item.export() 
+            previous_layer = current_layer
+
+            current_layer = item.layer
+
+            if (current_layer and (not previous_layer == current_layer)):
+
+                output += current_layer.export()
+
+            output += item.export() + "\n"
             
         output += "\n"
 
@@ -317,16 +521,6 @@ class ElementList:
 class StructuralModel:
     
 
-    dictionary = {
-        "nodes": "node", 
-        "beams": "beam", 
-        "trusses": "trus", 
-        "cables": "cabl", 
-        "springs": "spri",
-        "quads": "quad"
-    }
-
-
     unit_conversion = {
         2: 0.001,
         3: 0.01,
@@ -335,6 +529,11 @@ class StructuralModel:
         9: 0.3048
     }
     
+
+    """Constructor
+    Parameters:
+      name = model name
+    """
 
     def __init__(self, name):   
     
@@ -355,51 +554,87 @@ class StructuralModel:
 
         self.output_footer = "\nend"
 
+        return self
+
 
     def setup(self):
 
+        """Sets up structural model."""
+
         self.conversion_factor = StructuralModel.unit_conversion[rs.UnitSystem()]
+
+        return self
 
 
     def add_objects_from_layer(self, layer):
 
-        if (layer.depth > 1):
+        """Adds objects from a given layer to the ElementLists of the structural model."""
+
+        if (layer.depth > 1 and layer.path[0] == "input"):
 
             objects = layer.get_geometry()
 
-            if(layer.path[1] == "nodes"):
+            typ_plural = layer.path[1]
+            typ_sofi = plural_to_sofi[typ_plural]
+
+            if (typ_plural == "nodes"):
 
                 for obj in objects:
 
-                    n = Node(obj)
+                    if (rs.ObjectType(obj) == 1):
 
-                    self.nodes.add(n)
+                        n = Node(obj)
+                        n.layer = layer
 
-            if(layer.path[1] == "beams"):
+                        self.nodes.add(n)
+
+            if (typ_plural in line_elements):
 
                 for obj in objects:
 
-                    bm = LineElement(obj, "beam")
+                    if (rs.ObjectType(obj) == 4):
 
-                    # there is no Guid from Rhino associated with these points
-                    bm.n1 = self.nodes.add(Node(None, rs.CurveStartPoint(obj)))
-                    bm.n2 = self.nodes.add(Node(None, rs.CurveEndPoint(obj)))
+                        bm = LineElement(obj, typ_sofi)
 
-                    self.beams.add(bm)
+                        bm.layer = layer
+
+                        # adds beam endpoints to node list, if not already existing
+                        # if the node was already defined, self.nodes.add() will return that node
+                        bm.n1 = self.nodes.add(Node(None, rs.CurveStartPoint(obj)))
+                        bm.n2 = self.nodes.add(Node(None, rs.CurveEndPoint(obj)))
+
+                        self.beams.add(bm)
+
+        return self
 
 
     def export(self):
+
+        """Returns SOFiSTiK export."""
         
         return self.output_header + self.nodes.export() + self.beams.export() + self.output_footer
 
 
     def make_file(self):
+
+        """Creates or updates exported file.
+        Returns:
+          self
+        """
+
+        path = rs.DocumentPath()
+
+        i = path.rfind("\\")
+
+        path = path[:i-3]
         
-        f = open("system.dat", "w")
+        f = open(path + ".dat", "w")
         
         f.write(self.export())
         
         f.close()
+
+        return self
 
 
 
@@ -414,7 +649,5 @@ def Main():
         sofi.add_objects_from_layer(layer)
                     
     sofi.make_file()
-    
-    rs.CurrentLayer("input")
     
 Main()
