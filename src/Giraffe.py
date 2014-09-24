@@ -36,13 +36,14 @@ def get_output_path():
 
     platform = sys.platform
 
-    if platform in ["win32, cygwin"]:
+    #if platform in ["win32, cygwin"]:
 
-        path = path + "system.dat"
+    #    path = path + "system.dat"
 
-    else: #elif (platform in ["darwin", "rlinux2"]):
+    #else: #elif (platform in ["darwin", "rlinux2"]):
 
-        path = path[:i-3] + ".dat"
+    path = path[:i-3] + ".dat" # Mac OS
+    #path = path[:i] + "/system.dat" # Windows
 
     return path
 
