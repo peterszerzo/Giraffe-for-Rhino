@@ -10,46 +10,294 @@
 
 		<div class="wrapper">
 
-			<h1>Giraffe Guide</h1>
+			<h1 class="center">Giraffe for Rhino</h1>
 
-			<h2>Abstract</h2>
-			<p>Imports wireframe geometry as structural model into SOFiSTiK.</p>
+			<h2 class="center">a structural engineering add-on</h2>
 
-			<h2>The Layer Structure</h2>
+			<!-- intro -->
+			<h3>0. Introduction</h3>
+			<p>Giraffe is an add-on for Rhino that imports wireframe geometry into a structural engineering package. It allows for seamless transitions from architectural to structural models, easy adjustments and spotless clean organization, all within the comfort of Rhino.</p>
 
-			<p>Giraffe organizes structural information using a strict layer structure:</p>
-
+			<h4>Benefits:</h4>
 			<ul>
-
-				<li>all input geometry in a main 'input' layer</li>
-				<li>1st children layers: 'nodes', 'beams', 'trusses', 'cables', 'springs'</li>
-				<li>2nd children layers: ' // group number // [ // structural properties // ] { // description // }' format</li>
-					
-
-				<li>3rd, 4th etc. children layers: '// structural properties // { // description // }'</li>
-					
+				<li>the structure can be developed exclusively in Rhino - no need to write SOFiSTiK code</li>
+				<li>changes in geometry are picked up with a click of a button</li>
+				<li>same goes to changes in cross-sections, hinges, local axis rotations and so on</li>
 			</ul>
 
-			<p>Layers can be nested infinitely. Note that structural properties should only be in square brackets if the a group number is not specified. In fact, Rhino does not allow layer names to start with square brackets.</p>
+			<p>Changes are easy to make so that you can make more of them. Giraffe eases the process of experimentation with different structural solutions so that you can figure out the best one within your project deadline.</p>
 
-			<p>The nodes sublayer should not have further sublayers.</p>
+			<h4>When to use?</h4>
 
-			<h3>example</h3>
-			<p>layer: 2 [ncs 5 ahin mymz] {main facade girders}
-			<p>within 'beams' layer will produce statement:</p>
-			<p>!#!Label grp 2 - main facade girders</p>
-			<p>beam prop ncs 5 ahin mymz</p>
+			<p>Giraffe is designed to keep all geometry within Rhino, and as such it best suits structures with complex, irregular geometries.</p>
 
-			<p>rules:</p>
+			<h4>When not to use?</h4>
+
+			<p>For parametric geometries, especially in an early design stage, Giraffe is not the best way to go, at least for now. If you see a potential for Giraffe to act as a middle man between Rhino's Grasshopper plug-in and a structural analysis suite, please let me know so we can make that happen.</p>
+
+			<p>Giraffe does not mesh splines or complex surfaces, it only works with points, lines and quads. Needless to say, a freeform NURBS surface is too far up the tree.</p>
+
+			<p>For now, Giraffe does not handle intersections, as it is conceived to grant the modeler full control over what happens in the model. Let me know if you are interested in having this feature in a future release.</p>
+
+			<h4>Send Feedback and Get Involved</h4>
+
+			<p>Not for one split second should you hesitate to reach out with any comments and suggestions for the future development of this project.</p>
+
+			<p>Giraffe is developed using Rhino's PythonScript platform. If you have PythonScript experience, please consider suggesting improvements and sending feedback on the source code.</p>
+
+			<h4>The Tutorial</h4>
+
+			<p>The following tutorial walks through creating a simple model of a suspension bridge. This model may be found in the examples folder.</p>
+
+			<img class="center" id="bridge-rhino" src="images/bridge-rhino.png">
+
+			<!-- layers -->
+			<h3>1. Basic Rhino Layout</h3>
+
+			<p>Giraffe requires structural elements (points, lines and quads in Rhino) to be organized in a strict layer structure. Here is a basic example of a layer structure for the suspension bridge model. This model will contain custom nodes, beams in group 1 as well as cables in groups 10 and 11.</p>
+
+			<img class="center" src="images/layers-basic.png">
+
+			<p>For now, the 'nodes' layer should not have further sublayers. Same goes for the group layers under 'beams', 'cables' and 'trusses'. Providing group numbers is highly recommended.</p>
+
+			<p>All geometry must be in the 'input' layer, which can have the following sublayers:</p>
 			<ul>
-				<li>leading and trailing whitespaces allowed</li>
-				<li>group number is mandatory</li>
-				<li>layer properties may be omitted, including square brackets</li>
+				<li>nodes</li>
+				<li>beams</li>
+				<li>cables</li>
+				<li>trusses</li>
 			</ul>
+
+			<p>Geometry found in other layers will be simply ignored by Giraffe, and you should take advantage of this. For instance, you are welcome to sketch out your detailing ideas in a 'details' layer within 'input'. Make sure though that these miscellaneous layers are directly under 'input' - do not make them a sublayer of 'nodes' or 'beams'.</p>
+
+			<p>Likewise, other layers such as 'full-extruded-arch-model' may hang around as siblings of the input layer. Giraffe will leave them alone.</p>
+
+			<!-- structural properties -->
+			<h3>2. Adding Structural Properties</h3>
+
+			<p>Once structural elements are organized into these basic layers, numbering as well as all structural properties can be specified within Rhino.</p>
+
+			<h4>2.1. Layer Names</h4>
+			<p>Properties can be added by adding custom names to layers. Here is a second version of the previous layer structure.</p>
+
+			<img class="center" src="images/layers-with-props.png">
+
+			<p>Giraffe translates this layer structure into the following sofimsha input:</p>
+
+			<div class="code">
+				<pre>
+!*!Label *** NODES ***
+
+!*!Label node .. 
+$ [...]
+
+
+!*!Label *** LINE ELEMENTS ***
+
+!*!Label beam grp 1 .. 
+grp 1
+beam prop ncs 1 div 4
+$ [...]
+
+!*!Label cabl grp 10 .. 
+grp 10
+cabl prop ncs 300
+$ [...]
+
+!*!Label cabl grp 11 .. 
+grp 11
+cabl prop ncs 301
+$ [...]
+				</pre>
+			</div>
+
+			<h4>2.2. Object names</h4>
+
+			<p></p>
+
+			<!-- organizing -->
+			<h3>3. Labeling the Model</h3>
+
+			<p>Let's label things for our suspension bridge:</p>
+
+			<img class="center" src="images/layers-all.png">
+
+			<p>And end up with the following:</p>
+
+			<div class="code">
+				<pre>
+!*!Label *** NODES ***
+
+!*!Label node .. 
+$ [...]
+
+
+!*!Label *** LINE ELEMENTS ***
+
+!*!Label beam grp 1 .. deck
+grp 1
+beam prop ncs 1 div 4
+$ [...]
+
+!*!Label cabl grp 10 .. main cable
+grp 10
+cabl prop ncs 300
+$ [...]
+
+!*!Label cabl grp 11 .. hangers
+grp 11
+cabl prop ncs 301
+$ [...]
+				</pre>
+			</div>
 						
+			<!-- export -->
+			<h3>4. Exporting</h3>
 
-			<h2>Custom Properties</h2>
-			<p>By adding custom names to structural elements, their properties may be modified.</p>
+			<p>Now that the input structure is in place, we're ready to export.</p>
+
+			<h4>Tolerance</h4>
+
+			<p>Modeling is hardly ever perfect and things are going to misalign. Giraffe merges together all nodes that are within a specified tolerance from each other. For now, the tolerance value can be adjusted at the top of the script file.</p> 
+
+			<p>You will want to set the tolerance to a value that is smaller than the length of your shortest member but higher than the largest modeling error you are expecting. If, for instance, you know that your shortest member is 4" long and that some beams which should come together at the same node end up 1/2" apart due to drawing errors, a 1" tolerance value will make sure everything works the way you want it. Tolerance is always measured in the units of your model.</p>
+
+			<h4>Automatic numbering</h4>
+
+			<p>If a node- or element number is unspecified, Giraffe will add one such that numbering conflicts are avoided. Same goes for the endpoints of line elements which do not have a corresponding point object in Rhino.</p>
+
+			<h4>Finished Export</h4>
+
+			<p>The suspension bridge is ready - let's have a look at the file:</p>
+
+			<p>[ just to say it one more time: all of this is generated ]</p>
+
+			<div class="code">
+				<pre>
+$ generated by Giraffe for Rhino
++prog sofimsha
+head structure
+
+syst init gdiv 1000
+
+let#cf 1.0 $ conversion factor
+
+
+!*!Label *** NODES ***
+
+!*!Label node .. 
+node no 201 x 50.0*#cf y 0.0*#cf z 0.0*#cf fix pp
+node no 200 x -50.0*#cf y 0.0*#cf z 0.0*#cf fix xp
+node no 101 x 50.0*#cf y 15.0*#cf z 0.0*#cf fix pp
+node no 100 x -50.0*#cf y 15.0*#cf z 0.0*#cf fix pp
+
+!*!Label node .. endpoints numbered automatically
+node no 1 x 40.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 2 x 30.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 3 x 20.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 4 x 10.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 5 x 0.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 6 x -10.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 7 x -20.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 8 x -30.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 9 x -40.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 10 x 40.0*#cf y 10.59*#cf z 0.0*#cf 
+node no 11 x 30.0*#cf y 7.16*#cf z 0.0*#cf 
+node no 12 x 20.0*#cf y 4.71*#cf z 0.0*#cf 
+node no 13 x 10.0*#cf y 3.24*#cf z 0.0*#cf 
+node no 14 x 0.0*#cf y 2.75*#cf z 0.0*#cf 
+node no 15 x -10.0*#cf y 3.24*#cf z 0.0*#cf 
+node no 16 x -20.0*#cf y 4.71*#cf z 0.0*#cf 
+node no 17 x -30.0*#cf y 7.16*#cf z 0.0*#cf 
+node no 18 x -40.0*#cf y 10.59*#cf z 0.0*#cf 
+
+
+!*!Label *** LINE ELEMENTS ***
+
+!*!Label beam grp 1 .. deck
+grp 1
+beam prop ncs 1 div 4
+beam no 1 na 1 ne 201 
+beam no 2 na 2 ne 1 
+beam no 3 na 3 ne 2 
+beam no 4 na 4 ne 3 
+beam no 5 na 5 ne 4 
+beam no 6 na 6 ne 5 
+beam no 7 na 7 ne 6 
+beam no 8 na 8 ne 7 
+beam no 9 na 9 ne 8 
+beam no 10 na 200 ne 9 
+
+!*!Label cabl grp 10 .. main cable
+grp 10
+cabl prop ncs 300
+cabl no 11 na 10 ne 101 
+cabl no 12 na 11 ne 10 
+cabl no 13 na 12 ne 11 
+cabl no 14 na 13 ne 12 
+cabl no 15 na 14 ne 13 
+cabl no 16 na 15 ne 14 
+cabl no 17 na 16 ne 15 
+cabl no 18 na 17 ne 16 
+cabl no 19 na 18 ne 17 
+cabl no 20 na 100 ne 18 
+
+!*!Label cabl grp 11 .. hangers
+grp 11
+cabl prop ncs 301
+cabl no 21 na 1 ne 10 
+cabl no 22 na 2 ne 11 
+cabl no 23 na 3 ne 12 
+cabl no 24 na 4 ne 13 
+cabl no 25 na 5 ne 14 
+cabl no 26 na 6 ne 15 
+cabl no 27 na 7 ne 16 
+cabl no 28 na 8 ne 17 
+cabl no 29 na 9 ne 18 
+
+end
+				</pre>
+			</div>
+
+			<p>You will notice that the import keeps the models units and applies a conversion factor in the variable #cf (local to sofimsha). I happened to have modeled in meters, so its value is 1.0.</p>
+
+			<p>The nodes we numbered ourselves and the ones that were numbered by Giraffe are conveniently separated. So are all the layers. Navigating through this file is a breeze - and it will look the same for every model coming from every engineer on your team. I much hope that you like the sound of that.</p>
+
+			<p>For this initial release, the group divisor is kept at 1000.</p>
+
+			<!-- input structure -->
+			<h3>5. Input Syntax in Detail</h3>
+
+			<p>As shown in the previous examples, layer- and object names follow a very simple syntax that uses square and curly braces. This section describes this syntax in rigorous detail.</p>
+
+			<p>Giraffe parses this syntax and translates it into three properties, as follows:</p>
+
+			<ul>
+				<li>no: group number (if set in layer name) or element number (if set in object name)</li>
+				<li>prop: structural property, e.g. 'ncs 5 div 4 drot 45'</li>
+				<li>name: group or element name. These show up in labels and comments in the sofimsha file to keep it organized</li>
+			</ul>
+
+			<h4>5.1. Syntax Rules</h4>
+			<p>The basic format is the following:</p>
+			<div class="syntax">
+				<div class="syntax-block">no</div>
+				<div class="syntax-block">[ prop ]</div>
+				<div class="syntax-block">{ name }</div>
+			</div>
+			<p>'prop' and 'name' are always optional.</p>
+
+			<p>In case the number is ommitted, the syntax reduces to:</p>
+			<div class="syntax">
+				<div class="syntax-block">prop</div>
+				<div class="syntax-block">{ name }</div>
+			</div>
+			<p>Square brackets are ommitted, as Rhino does not allow a layer name to start with them. Giraffe will not confuse 'prop' with 'no', as prop is never a number.</p>
+			<p>If you wish to ommit the prop as well, you need to add a '#' placeholder, as you cannot start a layer name with '{'.</p>
+
+			<h4>5.2. Examples:</h4>
+
+			<p>The following examples will get you familiar with the input syntax.</p>
 
 		</div>
 
