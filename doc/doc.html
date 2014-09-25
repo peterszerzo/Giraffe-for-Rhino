@@ -14,82 +14,92 @@
 
 			<h2 class="center">a structural engineering add-on</h2>
 
-			<!-- intro -->
-			<h3>0. Introduction</h3>
-			<p>Giraffe is an add-on for Rhino that imports wireframe geometry into a structural engineering package. It allows for seamless transitions from architectural to structural models, easy adjustments and spotless clean organization, all within the comfort of Rhino.</p>
+			<div class="section" data-chapter="0">
 
-			<h4>Benefits:</h4>
-			<ul>
-				<li>the structure can be developed exclusively in Rhino - no need to write SOFiSTiK code</li>
-				<li>changes in geometry are picked up with a click of a button</li>
-				<li>same goes to changes in cross-sections, hinges, local axis rotations and so on</li>
-			</ul>
+				<h3>0. Introduction</h3>
+				<p>Giraffe is an add-on for Rhino that imports wireframe geometry into a structural engineering package. It allows for seamless transitions from architectural to structural models, easy adjustments and spotless clean organization, all within the comfort of Rhino.</p>
 
-			<p>Changes are easy to make so that you can make more of them. Giraffe eases the process of experimentation with different structural solutions so that you can figure out the best one within your project deadline.</p>
+				<h4>Benefits:</h4>
+				<ul>
+					<li>the structure can be developed exclusively in Rhino - no need to write SOFiSTiK code</li>
+					<li>changes in geometry are picked up with a click of a button</li>
+					<li>same goes to changes in cross-sections, hinges, local axis rotations and so on</li>
+				</ul>
 
-			<h4>When to use?</h4>
+				<p>Changes are easy to make so that you can make more of them. Giraffe eases the process of experimentation with different structural solutions so that you can figure out the best one within your project deadline.</p>
 
-			<p>Giraffe is designed to keep all geometry within Rhino, and as such it best suits structures with complex, irregular geometries.</p>
+				<h4>When to use?</h4>
 
-			<h4>When not to use?</h4>
+				<p>Giraffe is designed to keep all geometry within Rhino, and as such it best suits structures with complex, irregular geometries.</p>
 
-			<p>For parametric geometries, especially in an early design stage, Giraffe is not the best way to go, at least for now. If you see a potential for Giraffe to act as a middle man between Rhino's Grasshopper plug-in and a structural analysis suite, please let me know so we can make that happen.</p>
+				<h4>When not to use?</h4>
 
-			<p>Giraffe does not mesh splines or complex surfaces, it only works with points, lines and quads. Needless to say, a freeform NURBS surface is too far up the tree.</p>
+				<p>For parametric geometries, especially in an early design stage, Giraffe is not the best way to go, at least for now. If you see a potential for Giraffe to act as a middle man between Rhino's Grasshopper plug-in and a structural analysis suite, please let me know so we can make that happen.</p>
 
-			<p>For now, Giraffe does not handle intersections, as it is conceived to grant the modeler full control over what happens in the model. Let me know if you are interested in having this feature in a future release.</p>
+				<p>Giraffe does not mesh splines or complex surfaces, it only works with points, lines and quads. Needless to say, a freeform NURBS surface is too far up the tree.</p>
 
-			<h4>Send Feedback and Get Involved</h4>
+				<p>For now, Giraffe does not handle intersections, as it is conceived to grant the modeler full control over what happens in the model. Let me know if you are interested in having this feature in a future release.</p>
 
-			<p>Not for one split second should you hesitate to reach out with any comments and suggestions for the future development of this project.</p>
+				<h4>Send Feedback and Get Involved</h4>
 
-			<p>Giraffe is developed using Rhino's PythonScript platform. If you have PythonScript experience, please consider suggesting improvements and sending feedback on the source code.</p>
+				<p>Not for one split second should you hesitate to reach out with any comments and suggestions for the future development of this project.</p>
 
-			<h4>The Tutorial</h4>
+				<p>Giraffe is developed using Rhino's PythonScript platform. If you have PythonScript experience, please consider suggesting improvements and sending feedback on the source code.</p>
 
-			<p>The following tutorial walks through creating a simple model of a suspension bridge. This model may be found in the examples folder.</p>
+				<h4>The Tutorial</h4>
 
-			<img class="center" id="bridge-rhino" src="images/bridge-rhino.png">
+				<p>The following tutorial walks through creating a simple model of a suspension bridge. This model may be found in the examples folder.</p>
 
-			<p>The finished model will look like this:</p>
+				<img class="center bridge" src="images/bridge-rhino.png">
 
-			<img class="center" id="bridge-rhino" src="images/bridge-sofi.png">
+				<p>The finished model will look like this:</p>
 
-			<!-- layers -->
-			<h3>1. Basic Rhino Layout</h3>
+				<img class="center bridge" src="images/bridge-sofi.png">
 
-			<p>Giraffe requires structural elements (points, lines and quads in Rhino) to be organized in a strict layer structure. Here is a basic example of a layer structure for the suspension bridge model. This model will contain custom nodes, beams in group 1 as well as cables in groups 10 and 11.</p>
+			</div>
 
-			<img class="center" src="images/layers-basic.png">
+			<div class="section" data-chapter="1">
 
-			<p>For now, the 'nodes' layer should not have further sublayers. Same goes for the group layers under 'beams', 'cables' and 'trusses'. Providing group numbers is highly recommended.</p>
+				<h3>1. Basic Rhino Layout</h3>
 
-			<p>All geometry must be in the 'input' layer, which can have the following sublayers:</p>
-			<ul>
-				<li>nodes</li>
-				<li>beams</li>
-				<li>cables</li>
-				<li>trusses</li>
-			</ul>
+				<p>Giraffe requires structural elements (points, lines and quads in Rhino) to be organized in a strict layer structure. Here is a basic example of a layer structure for the suspension bridge model. This model will contain custom nodes, beams in group 1 as well as cables in groups 10 and 11.</p>
 
-			<p>Geometry found in other layers will be simply ignored by Giraffe, and you should take advantage of this. For instance, you are welcome to sketch out your detailing ideas in a 'details' layer within 'input'. Make sure though that these miscellaneous layers are directly under 'input' - do not make them a sublayer of 'nodes' or 'beams'.</p>
+				<img class="center" src="images/layers-basic.png">
 
-			<p>Likewise, other layers such as 'full-extruded-arch-model' may hang around as siblings of the input layer. Giraffe will leave them alone.</p>
+				<p>For now, the 'nodes' layer should not have further sublayers. Same goes for the group layers under 'beams', 'cables' and 'trusses'. Providing group numbers is highly recommended.</p>
 
-			<!-- structural properties -->
-			<h3>2. Adding Structural Properties</h3>
+				<p>All geometry must be in the 'input' layer, which can have the following sublayers:</p>
+				<ul>
+					<li>nodes</li>
+					<li>beams</li>
+					<li>cables</li>
+					<li>trusses</li>
+					<li>quads</li>
+					<li>springs</li>
+				</ul>
 
-			<p>Once structural elements are organized into these basic layers, numbering as well as all structural properties can be specified within Rhino.</p>
+				<p>Geometry found in other layers will be simply ignored by Giraffe, and you should take advantage of this. For instance, you are welcome to sketch out your detailing ideas in a 'details' layer within 'input'. Make sure though that these miscellaneous layers are directly under 'input' - do not make them a sublayer of 'nodes' or 'beams'.</p>
 
-			<h4>2.1. Layer Names</h4>
-			<p>Properties can be added by adding custom names to layers. Here is a second version of the previous layer structure.</p>
+				<p>Likewise, other layers such as 'full-extruded-arch-model' may hang around as siblings of the input layer. Giraffe will leave them alone.</p>
 
-			<img class="center" src="images/layers-with-props.png">
+			</div>
 
-			<p>Giraffe translates this layer structure into the following sofimsha input:</p>
+			<div class="section" data-chapter="2">
 
-			<div class="code">
-				<pre>
+				<!-- structural properties -->
+				<h3>2. Adding Structural Properties</h3>
+
+				<p>Once structural elements are organized into these basic layers, numbering as well as all structural properties can be specified within Rhino.</p>
+
+				<h4>2.1. Layer Names</h4>
+				<p>Properties can be added by adding custom names to layers. Here is a second version of the previous layer structure.</p>
+
+				<img class="center" src="images/layers-with-props.png">
+
+				<p>Giraffe translates this layer structure into the following sofimsha input:</p>
+
+				<div class="code">
+					<pre>
 !*!Label *** NODES ***
 
 !*!Label node .. 
@@ -112,24 +122,39 @@ $ [...]
 grp 11
 cabl prop ncs 301
 $ [...]
-				</pre>
+					</pre>
+				</div>
+
+				<h4>2.2. Object names</h4>
+
+				<p>Individual structural elements can also get their own numbering and properties. Just add the same deal to the object name (properties panel).</p>
+
+				<img class="center" src="images/object-prop.png">
+
+				<p>On the above image, the beam element gets the number 100 in its current group and also gets string- and weak axis hinges at its startpoint.</p>
+
+				<p>Startpoint?</p>
+
+				<p>Every time Giraffe is run, it automatically adds one purple point on each beam, 1/10 of the way from startpoint to endpoint. The point that's closer to purple is the startpoint. These purple points live under the 'output::startpoints' layer, and are locked automatically to not be in the way of your work.</p>
+
+				<img class="center" src="images/startpoints.png">
+
+				<p>The Flip command in Rhino changes the orientation of line elements. Rerun Giraffe to see the purple point move to the other side.</p>
+
 			</div>
 
-			<h4>2.2. Object names</h4>
+			<div class="section" data-chapter="3">
 
-			<p></p>
+				<h3>3. Labeling the Model</h3>
 
-			<!-- organizing -->
-			<h3>3. Labeling the Model</h3>
+				<p>Let's label things for our suspension bridge:</p>
 
-			<p>Let's label things for our suspension bridge:</p>
+				<img class="center" src="images/layers-all.png">
 
-			<img class="center" src="images/layers-all.png">
+				<p>And end up with the following:</p>
 
-			<p>And end up with the following:</p>
-
-			<div class="code">
-				<pre>
+				<div class="code">
+					<pre>
 !*!Label *** NODES ***
 
 !*!Label node .. 
@@ -152,40 +177,43 @@ $ [...]
 grp 11
 cabl prop ncs 301
 $ [...]
-				</pre>
+					</pre>
+				</div>
+
 			</div>
+
+			<div class="section" data-chapter="4">
 						
-			<!-- export -->
-			<h3>4. Exporting</h3>
+				<h3>4. Exporting</h3>
 
-			<p>Now that the input structure is in place, we're ready to export.</p>
+				<p>Now that the input structure is in place, we're ready to export.</p>
 
-			<h4>4.1. Getting the Project Folder</h4>
+				<h4>4.1. Getting the Project Folder</h4>
 
-			<p>Giraffe lives online <a href="https://github.com/pickled-plugins/Giraffe-for-Rhino">here</a>. On the right of the screen, you should see a Download ZIP button. Unpack this folder and save it at a convenient location on your computer. This folder is referred to as the project folder.</p>
+				<p>Giraffe lives online <a href="https://github.com/pickled-plugins/Giraffe-for-Rhino">here</a>. On the right of the screen, you should see a Download ZIP button. Unpack this folder and save it at a convenient location on your computer. This folder is referred to as the project folder.</p>
 
-			<h4>4.2. Tolerance</h4>
+				<h4>4.2. Tolerance</h4>
 
-			<p>Modeling is hardly ever perfect and things are going to misalign. Giraffe merges together all nodes that are within a specified tolerance from each other. The tolerance value can be adjusted in the src/giraffe_configure.py file within the project folder. Tolerance is always measured in the units of your model.</p>
+				<p>Modeling is hardly ever perfect and things are going to misalign. Giraffe merges together all nodes that are within a specified tolerance from each other. The tolerance value can be adjusted in the src/giraffe_configure.py file within the project folder. Tolerance is always measured in the units of your model.</p>
 
-			<p>You will want to set the tolerance to a value that is smaller than the length of your shortest member but higher than the largest modeling error you are expecting. If, for instance, you know that your shortest member is 4" long and that some beams which should come together at the same node end up 1/2" apart due to drawing errors, a 1" tolerance value will make sure everything works the way you want it.</p>
+				<p>You will want to set the tolerance to a value that is smaller than the length of your shortest member but higher than the largest modeling error you are expecting. If, for instance, you know that your shortest member is 4" long and that some beams which should come together at the same node end up 1/2" apart due to drawing errors, a 1" tolerance value will make sure everything works the way you want it.</p>
 
-			<h4>4.3. Automatic Numbering</h4>
+				<h4>4.3. Automatic Numbering</h4>
 
-			<p>If a node- or element number is unspecified, Giraffe will add one such that numbering conflicts are avoided. Same goes for the endpoints of line elements which do not have a corresponding point object in Rhino.</p>
+				<p>If a node- or element number is unspecified, Giraffe will add one such that numbering conflicts are avoided. Same goes for the endpoints of line elements which do not have a corresponding point object in Rhino.</p>
 
-			<h4>4.4. Running the Plug-in</h4>
+				<h4>4.4. Running the Plug-in</h4>
 
-			<p>Within Rhino, enter the command 'RunPythonScript'.</p>
+				<p>Within Rhino, enter the command 'RunPythonScript'.</p>
 
-			<h4>4.5. Finished Export</h4>
+				<h4>4.5. Finished Export</h4>
 
-			<p>The suspension bridge is ready - let's have a look at the file:</p>
+				<p>The suspension bridge is ready - let's have a look at the file:</p>
 
-			<p>[ just to say it one more time: all of this is generated ]</p>
+				<p>[ just to say it one more time: all of this is generated ]</p>
 
-			<div class="code">
-				<pre>
+				<div class="code">
+					<pre>
 $ generated by Giraffe for Rhino
 +prog sofimsha
 head structure
@@ -268,50 +296,65 @@ cabl no 28 na 8 ne 17
 cabl no 29 na 9 ne 18 
 
 end
-				</pre>
+					</pre>
+				</div>
+
+				<p>You will notice that the import keeps the models units and applies a conversion factor in the variable #cf (local to sofimsha). I happened to have modeled in meters, so its value is 1.0.</p>
+
+				<p>The nodes we numbered ourselves and the ones that were numbered by Giraffe are conveniently separated. So are all the layers. Navigating through this file is a breeze - and it will look the same for every model coming from every engineer on your team. I much hope that you like the sound of that.</p>
+
+				<p>For this initial release, the group divisor is kept at 1000.</p>
+
+				<h4>4.6. Note on Quads and Springs</h4>
+
+				<p>To draw a quad, use the 'SrfPt' command in Rhino. For now, the quad needs to have 4 nodes. Triangles will be implemented in the next release.</p>
+
+				<p>Springs are even easier: just draw a line. The startpoint will represent the node in which the spring acts, and the spatial orientation of the line corresponds to the orientation of the spring force. The length of the line representing the spring is irrelevant: only the direction matters. The endpoint of the spring line will not be added as a node.</p>
+
+				<p>Make sure all quads are in the 'quads' sublayer and springs are in the 'springs' sublayer. If you misplace a quad, it will simply be ignored. However, placing a spring in the 'beams' layer will add the endpoint node and a funny looking beam to your structure.</p>
+
 			</div>
 
-			<p>You will notice that the import keeps the models units and applies a conversion factor in the variable #cf (local to sofimsha). I happened to have modeled in meters, so its value is 1.0.</p>
+			<div class="section" data-chapter="5">
 
-			<p>The nodes we numbered ourselves and the ones that were numbered by Giraffe are conveniently separated. So are all the layers. Navigating through this file is a breeze - and it will look the same for every model coming from every engineer on your team. I much hope that you like the sound of that.</p>
+				<h3>5. Input Syntax in Detail</h3>
 
-			<p>For this initial release, the group divisor is kept at 1000.</p>
+				<p>As shown in the previous examples, layer- and object names follow a very simple syntax that uses square and curly braces. This section describes this syntax in rigorous detail.</p>
 
-			<!-- input structure -->
-			<h3>5. Input Syntax in Detail</h3>
+				<p>Giraffe parses this syntax and translates it into three properties, as follows:</p>
 
-			<p>As shown in the previous examples, layer- and object names follow a very simple syntax that uses square and curly braces. This section describes this syntax in rigorous detail.</p>
+				<ul>
+					<li>no: group number (if set in layer name) or element number (if set in object name)</li>
+					<li>prop: structural property, e.g. 'ncs 5 div 4 drot 45'</li>
+					<li>name: group or element name. These show up in labels and comments in the sofimsha file to keep it organized</li>
+				</ul>
 
-			<p>Giraffe parses this syntax and translates it into three properties, as follows:</p>
+				<h4>5.1. Syntax Rules</h4>
+				<p>The basic format is the following:</p>
+				<div class="syntax">
+					<div class="syntax-block">no</div>
+					<div class="syntax-block">[ prop ]</div>
+					<div class="syntax-block">{ name }</div>
+				</div>
+				<p>'prop' and 'name' are always optional.</p>
 
-			<ul>
-				<li>no: group number (if set in layer name) or element number (if set in object name)</li>
-				<li>prop: structural property, e.g. 'ncs 5 div 4 drot 45'</li>
-				<li>name: group or element name. These show up in labels and comments in the sofimsha file to keep it organized</li>
-			</ul>
+				<p>In case the number is ommitted, the syntax reduces to:</p>
+				<div class="syntax">
+					<div class="syntax-block">prop</div>
+					<div class="syntax-block">{ name }</div>
+				</div>
+				<p>Square brackets are ommitted, as Rhino does not allow a layer name to start with them. Giraffe will not confuse 'prop' with 'no', as prop is never a number.</p>
+				<p>If you wish to ommit the prop as well, you need to add a '#' placeholder, as you cannot start a layer name with '{'.</p>
 
-			<h4>5.1. Syntax Rules</h4>
-			<p>The basic format is the following:</p>
-			<div class="syntax">
-				<div class="syntax-block">no</div>
-				<div class="syntax-block">[ prop ]</div>
-				<div class="syntax-block">{ name }</div>
+				<h4>5.2. Examples:</h4>
+
+				<p>The following examples will get you familiar with the input syntax.</p>
+
 			</div>
-			<p>'prop' and 'name' are always optional.</p>
-
-			<p>In case the number is ommitted, the syntax reduces to:</p>
-			<div class="syntax">
-				<div class="syntax-block">prop</div>
-				<div class="syntax-block">{ name }</div>
-			</div>
-			<p>Square brackets are ommitted, as Rhino does not allow a layer name to start with them. Giraffe will not confuse 'prop' with 'no', as prop is never a number.</p>
-			<p>If you wish to ommit the prop as well, you need to add a '#' placeholder, as you cannot start a layer name with '{'.</p>
-
-			<h4>5.2. Examples:</h4>
-
-			<p>The following examples will get you familiar with the input syntax.</p>
 
 		</div>
+
+		<script src="jquery-2.1.1.min.js">
 
 	</body>
 

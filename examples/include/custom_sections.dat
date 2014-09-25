@@ -1,0 +1,52 @@
+#define i-sec
+  sect #ncs mno #mno ym 0[mm] zm 0[mm] TITL 'i-sec'
+  plat 101 yb -(#b)[mm] zb -(#h-#tf)/2[mm] ye  0[mm] ze -(#h-#tf)/2[mm] t #tf[mm]
+       102 yb +(#b)[mm] zb -(#h-#tf)/2[mm] ye  0[mm] ze -(#h-#tf)/2[mm] t #tf[mm]
+       103 yb -(#b)[mm] zb +(#h-#tf)/2[mm] ye  0[mm] ze +(#h-#tf)/2[mm] t #tf[mm]
+       104 yb +(#b)[mm] zb +(#h-#tf)/2[mm] ye  0[mm] ze +(#h-#tf)/2[mm] t #tf[mm]
+       105 yb 0[mm] zb +(#h-#tf)/2[mm] ye  0[mm] ze -(#h-#tf)/2[mm] t #tf[mm]
+#enddef
+
+#define box
+  sect #ncs mno #mno ym 0[mm] zm 0[mm] TITL 'rectangular HSS'
+  plat 101 yb -(#b-#tw)/2[mm] zb -(#h-#tf)/2[mm] ye  (#b-#tw)/2[mm] ze -(#h-#tf)/2[mm] t #tf[mm]
+       102                                         ye  (#b-#tw)/2[mm] ze  (#h-#tf)/2[mm] t #tw[mm]
+       103                                         ye -(#b-#tw)/2[mm] ze  (#h-#tf)/2[mm] t #tf[mm]
+       104                                         ye -(#b-#tw)/2[mm] ze -(#h-#tf)/2[mm] t #tw[mm]
+#enddef
+
+
+#define rect
+sect #ncs mno #mno ; poly mno #mno
+  vert 1 -#b/2[mm]     0[mm]
+  vert 2 -#b/2[mm]  #h/2[mm]
+  vert 3     0[mm]  #h/2[mm]
+  vert 4  #b/2[mm]  #h/2[mm]
+  vert 5  #b/2[mm]     0[mm]
+  vert 6  #b/2[mm] -#h/2[mm]
+  vert 7     0[mm] -#h/2[mm]
+  vert 8 -#b/2[mm] -#h/2[mm]
+#enddef rect
+
+
+#define t-sect-rot
+sect #ncs mno #mno
+plat   no       yb                  zb                           ye          ze            t
+       1        -#b/2*cos(#alpha)   -#tf/2+#b/2*sin(#alpha)      0           -#tf/2      #tf
+       2        +#b/2*cos(#alpha)   -#tf/2-#b/2*sin(#alpha)      0           -#tf/2      #tf
+       3        0                   -#tf/2                       0           +#h-#tf/2   #tw
+#enddef
+
+#define t-sect
+let#alpha 0
+#include t-sect-rot
+#enddef
+
+
+#define cruciform
+sect #ncs mno #mno
+PLAT NO  1 YB  -#b/2     ZB 0        YE 0  ZE 0       T #tf
+PLAT NO  2 YB  +#b/2     ZB 0        YE 0  ZE 0       T #tf
+PLAT NO  3 YB  0     ZB -#h/2        YE 0  ZE 0       T #tw
+PLAT NO  4 YB  0     ZB +#h/2        YE 0  ZE 0       T #tw
+#enddef

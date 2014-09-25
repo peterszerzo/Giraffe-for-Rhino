@@ -1,0 +1,89 @@
+
+$ \\\***\\\\\\\\\\\**\\
+$    UNIT CONVERSION
+$ ///***///////////**//
+
+$  written and maintained: psz / p.szerzo@sbp.de
+$  revision 4, 8/18/2014
+
+$  bib: AISC Steel Construction Manual, 14th Ed.
+
+
+$ LENGTH
+$ * Imperial to Imperial
+FTtoIN   = 12
+INtoFT   = 1/12
+$ * Metric to Metric
+MtoMM    = 1000
+MMtoM    = 0.001
+$ * Imperial to Metric
+FTtoM    =  0.3048
+FTtoMM   =  304.8
+INtoM    =  0.0254
+INtoMM   =  25.4
+$ * Metric to Imperial
+MtoFT    =  3.2808
+MMtoFT   =  0.0032808
+MtoIN    =  39.37
+MMtoIN   =  0.03937
+
+
+$ FORCE
+$ * Imperial to Imperial
+KIPtoLB  = 1000
+LBtoKIP  = 0.001
+$ * Imperial to Metric
+LBtoN    = 4.448
+LBtoKN   = 0.004448
+KIPtoN   = 4448
+KIPtoKN  = 4.448
+$ * Metric to Imperial
+NtoLB    = 0.22482
+NtoKIP   = 0.00022482
+KNtoLB   = 224.82
+KNtoKIP  = 0.22482
+
+
+$ PRESSURE
+$ * Imperial to Metric
+LB/IN2toKPA   = 6.895
+PSItoKPA      = 6.895
+LB/FT2toKPA   = 0.0479
+PSFtoKPA      = 0.0479
+$ * Metric to Imperial
+KPAtoPSF      = 20.877
+KPAtoPSI      = 0.145
+
+
+$ MOMENT
+$ * Imperial to Metric
+KIPINtoKNM = 0.113
+KIPFTtoKNM = 1.356
+$ * Metric to Imperial
+KNMtoKIPIN = 8.85
+KNMtoKIPFT = 0.7375
+
+
+$ FORCE PER UNIT LENGTH
+$ * Imperial to Metric
+LB/FTtoKN/M   = 0.014593
+KIP/FTtoKN/M  = 14.593
+LB/INtoKN/M   = 0.1751
+KIP/INtoKN/M  = 175.1
+$ * Metric to Imperial
+KN/MtoLB/IN   = 5.711
+KN/MtoKIP/IN  = 0.005711
+KN/MtoLB/FT   = 68.525
+KN/MtoKIP/FT  = 0.068525
+
+
+$ USAGE EXAMPLES
+
+$ 30ft long beam
+$ node no 1,2 x 0,30*$(FTtoM) y 0,0 z 0,0 ; beam no 1 na 1 ne 2 ncs 1
+
+$ Uniformly distributed wind load on beam 1, pressure 30psf, tributary height 18ft
+$ beam from 1 to 1 type py pa 30*$(PSFtoKPA)*18*$(FTtoM)
+$   or
+$ beam from 1 to 1 type py pa 30*18*$(LB/FTtoKN/M)
+

@@ -1,0 +1,35 @@
+#include ../include/sofi_convert.dat
+#include ../include/custom_sections.dat
+
++prog aqua urs:1
+head
+
+norm us aisc 2005
+
+#include ../include/materials.dat
+#include ../include/sections.dat
+
+
+let#h 8*$(INtoMM)
+let#b 3*$(INtoMM)
+let#tf 1.25*$(INtoMM)
+let#tw 1.25*$(INtoMM)
+let#mno 2
+let#ncs 1
+#include t-sect
+
+$ weak
+let#h  8*$(INtoMM)
+let#b  4*$(INtoMM)
+let#tf 0.33*$(INtoMM)
+let#tw 0.33*$(INtoMM)
+let#mno 1
+let#ncs 10
+#include box
+
+let#ncs 500
+#include box
+
+end
+
+#include system.dat

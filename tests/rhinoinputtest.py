@@ -70,6 +70,13 @@ class IntegrationTest(unittest.TestCase):
 		self.assertEqual(inp.get_prop(), "gdiv 4")
 		self.assertEqual(inp.get_name(), "some beam")
 
+	def test_square_brackets_only(self):
+
+		inp = ri.RhinoInput("[]")
+		self.assertEqual(inp.get_no(), -1)
+		self.assertEqual(inp.get_prop(), "")
+		self.assertEqual(inp.get_name(), "")
+
 
 if __name__ == '__main__':
 

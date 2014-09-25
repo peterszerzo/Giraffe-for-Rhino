@@ -1,0 +1,15 @@
++prog aqua urs:1
+head
+
+norm us aisc 2005
+
+stee 1 a 50 $ 50ksi structural steel
+
+tube no  1  d 200[mm] t 20[mm] mno 1 $ deck section
+
+tube no 300 d  90[mm] t  0[mm] mno 1 $ main cable section
+tube no 301 d  20[mm] t  0[mm] mno 1 $ hanger section
+
+end
+
+#include system.dat

@@ -82,7 +82,13 @@ class RhinoInput():
 
         if prop_default == "":
 
-            return self.get_before("{", "{").strip()
+            before_curly = self.get_before("{", "{").strip()
+
+            if before_curly != "[]":
+
+                return before_curly
+
+            return ""
 
         if prop_default == "#":
 
