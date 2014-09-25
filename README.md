@@ -9,11 +9,11 @@ Giraffe for Rhino
 
 Use:
 
-1. download and save Giraffe.py
+1. click the download-zip button on the right of this screen
 
 2. in Rhino, enter the command 'RunPythonScript'
 
-3. point to Giraffe.py
+3. point to src/Giraffe.py
 
 4. your sofimsha input file will appear in the folder of your 3d model under the name 'system.dat'
 

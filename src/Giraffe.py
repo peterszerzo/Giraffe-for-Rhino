@@ -8,23 +8,18 @@ import math
 import string
 import rhinoscriptsyntax as rs
 import rhinoinput as ri
+import giraffe_configure as gc
+import giraffe_setup as gs
 
-
-plural_to_sofi = {
-
-    "nodes": "node", 
-    "beams": "beam", 
-    "trusses": "trus", 
-    "cables": "cabl", 
-    "springs": "spri",
-    "quads": "quad"
-
-}
+point_elements = [ "nodes" ]
 
 line_elements = [ "beams", "trusses", "cables" ]
 
-tolerance = 0.1 # how close points have to be to be considered one
+area_elements = [ "quads" ]
 
+spring_elements = [ "springs" ]
+
+all_elements = point_elements + line_elements + area_elements + spring_elements
 
 def get_output_path():
 
@@ -34,22 +29,15 @@ def get_output_path():
 
     i = path.rfind("\\")
 
-    platform = sys.platform
+    if gc.operating_system == "mac":
 
-    #if platform in ["win32, cygwin"]:
+        path = path[:i-3] + ".dat" 
 
-    #    path = path + "system.dat"
+    elif gc.operating_system == "win":
 
-    #else: #elif (platform in ["darwin", "rlinux2"]):
-
-    # Mac OS
-    path = path[:i-3] + ".dat" 
-    
-    # Windows
-    #path = path[:i] + "/system.dat" 
+        path = path[:i] + "/system.dat" 
 
     return path
-
 
 class GiraffeLayer():
     
@@ -90,8 +78,33 @@ class GiraffeLayer():
         layers = []
 
         for layer_name in layer_names:
+
+            layer = GiraffeLayer(layer_name)
         
-            layers.append(GiraffeLayer(layer_name))
+            layers.append(layer)
+
+        return layers
+
+
+    @classmethod
+    def get_all_structural(self):
+
+        """Returns a list of all layers containing structural geometry GiraffeLayer objects."""
+
+        layer_names = rs.LayerNames()
+
+        layers = []
+
+        for layer_name in layer_names:
+
+            layer = GiraffeLayer(layer_name)
+        
+            if layer.is_structural():
+
+                layers.append(layer)
+
+        # sort layers to make sure numbered nodes are added first and to maintain regular order
+        layers.sort(key = lambda x: x.to_int())
 
         return layers
 
@@ -139,6 +152,34 @@ class GiraffeLayer():
         return self
 
 
+    def is_structural(self):
+
+        """Returns whether layer is a valid structural layer."""
+
+        if self.depth > 1:
+
+            if (self.path[0] == "input") and (self.path[1] in all_elements):
+
+                return True
+
+        return False
+
+
+    def to_int(self):
+
+        """Assigns integer value to the layer, adhering to the proper order."""
+
+        if not self.is_structural():
+
+            return -1
+
+        value = all_elements.index(self.path[1]) * 100
+
+        value += (self.depth - 2) * 10
+
+        return value
+
+
     def set_current(self):
 
         """Sets layer as current.
@@ -170,6 +211,23 @@ class GiraffeLayer():
         """Returns geometry from a given layer as a list. Sublayer objects are not included."""
 
         return rs.ObjectsByLayer(self.name)
+
+
+    def get_allowed_geometry(self):
+
+        """Returns geometry that is allowed in the current layer (point for nodes, line for beams etc.)"""
+
+        objects = self.get_geometry()
+
+        allowed_objects = []
+
+        for obj in objects:
+
+            if rs.ObjectType(obj) == gs.allowed_object_types[self.path[1]]:
+
+                allowed_objects.append(obj)
+
+        return allowed_objects
 
 
     def clear(self):
@@ -262,7 +320,7 @@ class GiraffeLayer():
 
         """Returns element type."""
 
-        return plural_to_sofi[self.path[1]]
+        return gs.plural_to_sofi[self.path[1]]
 
 
     def get_export_header(self):
@@ -277,7 +335,7 @@ class GiraffeLayer():
 
             grp_string = " " + grp_string
 
-        return "\n!*!Label " + plural_to_sofi[self.path[1]] + grp_string + " .. " + name + "\n"
+        return "\n!*!Label " + gs.plural_to_sofi[self.path[1]] + grp_string + " .. " + name + "\n"
 
 
     def export(self):
@@ -410,7 +468,7 @@ class Node(StructuralElement):
 
         """Returns True if node overlaps with specified node (distance smaller than tolerance)."""
         
-        return (self.distance_to(n) < tolerance)
+        return (self.distance_to(n) < gc.tolerance)
 
 
     def export_coordinates(self):
@@ -432,6 +490,70 @@ class Node(StructuralElement):
         return output
 
 
+class SpringSN(StructuralElement): # single node spring
+    
+
+    def __init__(self, obj):
+
+        """Constructor.
+        Parameters:
+          obj = Guid from Rhino
+          coordinates = if there is no Guid, coordinates should be set
+        """
+        
+        StructuralElement.__init__(self, obj, "spri")
+        self.build()
+
+        # node is not set in the constructor
+        self.n = None
+        
+        
+    def build(self):
+
+        """Build node from Rhino line."""
+
+        pt1 = rs.CurveStartPoint(self.geo)
+        pt2 = rs.CurveEndPoint(self.geo)
+
+        # get spring direction
+        self.dx = round(+ pt2[0] - pt1[0], 5)
+        self.dy = round(+ pt2[1] - pt1[1], 5)
+        self.dz = round(+ pt2[2] - pt1[2], 5)
+
+        # normalize direction
+        d = (self.dx ** 2 + self.dy ** 2 + self.dz ** 2) ** 0.5
+        self.dx /= d
+        self.dy /= d
+        self.dz /= d
+
+                
+        
+    def identical_to(self, elem):
+
+        """Returns True if node overlaps with specified node (distance smaller than tolerance)."""
+        
+        return (self.n == elem.n) and (math.fabs(self.dx - elem.dx) < 0.001) and (math.fabs(self.dy - elem.dy) < 0.001) and (math.fabs(self.dz - elem.dz) < 0.001)
+
+
+    def export_direction(self):
+
+        """Returns coordinate export."""
+
+        return "dx " + str(self.dx) + " dy " + str(self.dy) + " dz " + str(self.dz)
+
+
+    def export(self):
+        
+        """Returns SOFiSTiK export."""
+
+        output = self.export_base() + " na " + str(self.n.no) + " " + self.export_direction() + " " + self.prop
+
+        if (self.name != ""):
+            output += "$ " + self.name
+
+        return output        
+
+
 
 class LineElement(StructuralElement):
 
@@ -441,6 +563,8 @@ class LineElement(StructuralElement):
         """Constructor."""
 
         StructuralElement.__init__(self, obj, typ)
+
+        # nodes are not set in the constructor, but assigned in the StructuralModel class once nodes are added
         self.n1 = None
         self.n2 = None
 
@@ -492,6 +616,47 @@ class LineElement(StructuralElement):
 
         return output
 
+
+class AreaElement(StructuralElement):
+
+
+    def __init__(self, obj):
+
+        """Constructor."""
+
+        StructuralElement.__init__(self, obj, "quad")
+
+        # nodes are not set in the constructor, but assigned in the StructuralModel class once nodes are added
+        self.n1 = None
+        self.n2 = None
+        self.n3 = None
+        self.n4 = None
+
+
+    def build(self):
+
+        """Placeholder for a method analogous to Node.build()."""
+
+        return True
+
+
+    def identical_to(self, elem):
+
+        """Returns true for overlapping line elements (identical start- and endnodes)."""
+
+        return (self.n1 == elem.n1) and (self.n2 == elem.n2) and (self.n3 == elem.n3) and (self.n4 == elem.n4)
+
+
+    def export(self):
+
+        """Returns SOFiSTiK export."""
+
+        output = self.export_base() + " n1 " + str(self.n1.no) + " n2 " + str(self.n2.no) + " n3 " + str(self.n3.no) + " n4 " + str(self.n4.no) + " " + self.prop
+
+        if (self.name != ""):
+            output += "$ " + self.name
+
+        return output
 
 
 class ElementList:
@@ -710,7 +875,9 @@ class StructuralModel:
         self.name = name    
         
         self.nodes = ElementList("nodes")
-        self.beams = ElementList("line elements")
+        self.springs_sn = ElementList("single node springs")
+        self.line_elements = ElementList("line elements")
+        self.area_elements = ElementList("area elements")
                 
         self.gdiv = 1000
         self.current_group = -1
@@ -718,45 +885,88 @@ class StructuralModel:
         return self
 
 
+    def add_node(self, obj, typ_sofi, layer):
+
+        """Adds node from object."""
+
+        n = Node(obj)
+        n.layer = layer
+
+        self.nodes.add(n)
+
+
+    def add_line_element(self, obj, typ_sofi, layer):
+
+        """Adds line element from object."""
+
+        bm = LineElement(obj, typ_sofi)
+        bm.n1 = self.nodes.add(Node(None, rs.CurveStartPoint(obj)))
+        bm.n2 = self.nodes.add(Node(None, rs.CurveEndPoint(obj)))
+
+        bm.mark_start_point()
+        bm.layer = layer
+
+        self.line_elements.add(bm)
+
+
+    def add_spring_sn(self, obj, typ_sofi, layer):
+
+        """Adds single node spring element from object."""
+
+        sp = SpringSN(obj)
+        sp.n = self.nodes.add(Node(None, rs.CurveStartPoint(obj)))
+
+        sp.layer = layer
+
+        self.springs_sn.add(sp)   
+
+
+    def add_area_element(self, obj, typ_sofi, layer):
+
+        """Adds area element from object."""
+
+        qd = AreaElement(obj)
+
+        pts = rs.SurfacePoints(obj)
+
+        qd.n1 = self.nodes.add(Node(None, pts[0]))
+        qd.n2 = self.nodes.add(Node(None, pts[1]))
+        qd.n3 = self.nodes.add(Node(None, pts[3]))
+        qd.n4 = self.nodes.add(Node(None, pts[2]))
+
+        qd.layer = layer
+
+        self.area_elements.add(qd) 
+
+
     def add_objects_from_layer(self, layer):
 
         """Adds objects from a given layer to the ElementLists of the structural model."""
 
-        if (layer.depth > 1) and (layer.path[0] == "input"):
+        objects = layer.get_allowed_geometry()
 
-            objects = layer.get_geometry()
+        typ_plural = layer.path[1]
+        typ_sofi = gs.plural_to_sofi[typ_plural]
 
-            typ_plural = layer.path[1]
-            typ_sofi = plural_to_sofi[typ_plural]
+        for obj in objects:
 
-            if typ_plural == "nodes":
+            # !! REFACTOR TO CALL PROGRAMATICALLY -> ELIMINATE CONDITIONALS !!
 
-                for obj in objects:
+            if typ_plural in point_elements:
 
-                    if rs.ObjectType(obj) == 1:
-
-                        n = Node(obj)
-                        n.layer = layer
-
-                        self.nodes.add(n)
+                self.add_node(obj, typ_sofi, layer)
 
             if typ_plural in line_elements:
 
-                for obj in objects:
+                self.add_line_element(obj, typ_sofi, layer)
 
-                    if rs.ObjectType(obj) == 4:
+            if typ_plural in spring_elements:
 
-                        bm = LineElement(obj, typ_sofi)
+                self.add_spring_sn(obj, typ_sofi, layer)         
 
-                        # adds beam endpoints to node list, if not already existing
-                        # if the node was already defined, self.nodes.add() will return that node
-                        bm.n1 = self.nodes.add(Node(None, rs.CurveStartPoint(obj)))
-                        bm.n2 = self.nodes.add(Node(None, rs.CurveEndPoint(obj)))
+            if typ_plural in area_elements:
 
-                        bm.mark_start_point()
-                        bm.layer = layer
-
-                        self.beams.add(bm)
+                self.add_area_element(obj, typ_sofi, layer) 
 
         return self
 
@@ -765,7 +975,7 @@ class StructuralModel:
 
         """Builds model from current layer structure within the Rhino model."""
 
-        layers = GiraffeLayer.get_all()
+        layers = GiraffeLayer.get_all_structural()
                     
         for layer in layers:
 
@@ -790,7 +1000,7 @@ class StructuralModel:
 
         """Returns SOFiSTiK export."""
         
-        return self.get_export_header() + self.nodes.export() + self.beams.export() + "\nend"
+        return self.get_export_header() + self.nodes.export() + self.line_elements.export() + self.area_elements.export() + self.springs_sn.export() + "\nend"
 
 
     def make_file(self):

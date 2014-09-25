@@ -4,36 +4,36 @@ head structure
 
 syst init gdiv 1000
 
-let#conversion_factor 1.0
+let#cf 1.0 $ conversion factor
 
 
 !*!Label *** NODES ***
 
 !*!Label node .. 
-node no 201 x 50.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor fix pp
-node no 200 x -50.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor fix xp
-node no 101 x 50.0*#conversion_factor y 15.0*#conversion_factor z 0.0*#conversion_factor fix pp
-node no 100 x -50.0*#conversion_factor y 15.0*#conversion_factor z 0.0*#conversion_factor fix pp
+node no 201 x 50.0*#cf y 0.0*#cf z 0.0*#cf fix pp
+node no 200 x -50.0*#cf y 0.0*#cf z 0.0*#cf fix xp
+node no 101 x 50.0*#cf y 15.0*#cf z 0.0*#cf fix pp
+node no 100 x -50.0*#cf y 15.0*#cf z 0.0*#cf fix pp
 
 !*!Label node .. endpoints numbered automatically
-node no 1 x 40.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 2 x 30.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 3 x 20.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 4 x 10.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 5 x 0.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 6 x -10.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 7 x -20.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 8 x -30.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 9 x -40.0*#conversion_factor y 0.0*#conversion_factor z 0.0*#conversion_factor 
-node no 10 x 40.0*#conversion_factor y 10.59*#conversion_factor z 0.0*#conversion_factor 
-node no 11 x 30.0*#conversion_factor y 7.16*#conversion_factor z 0.0*#conversion_factor 
-node no 12 x 20.0*#conversion_factor y 4.71*#conversion_factor z 0.0*#conversion_factor 
-node no 13 x 10.0*#conversion_factor y 3.24*#conversion_factor z 0.0*#conversion_factor 
-node no 14 x 0.0*#conversion_factor y 2.75*#conversion_factor z 0.0*#conversion_factor 
-node no 15 x -10.0*#conversion_factor y 3.24*#conversion_factor z 0.0*#conversion_factor 
-node no 16 x -20.0*#conversion_factor y 4.71*#conversion_factor z 0.0*#conversion_factor 
-node no 17 x -30.0*#conversion_factor y 7.16*#conversion_factor z 0.0*#conversion_factor 
-node no 18 x -40.0*#conversion_factor y 10.59*#conversion_factor z 0.0*#conversion_factor 
+node no 1 x 40.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 2 x 30.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 3 x 20.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 4 x 10.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 5 x 0.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 6 x -10.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 7 x -20.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 8 x -30.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 9 x -40.0*#cf y 0.0*#cf z 0.0*#cf 
+node no 10 x 40.0*#cf y 10.59*#cf z 0.0*#cf 
+node no 11 x 30.0*#cf y 7.16*#cf z 0.0*#cf 
+node no 12 x 20.0*#cf y 4.71*#cf z 0.0*#cf 
+node no 13 x 10.0*#cf y 3.24*#cf z 0.0*#cf 
+node no 14 x 0.0*#cf y 2.75*#cf z 0.0*#cf 
+node no 15 x -10.0*#cf y 3.24*#cf z 0.0*#cf 
+node no 16 x -20.0*#cf y 4.71*#cf z 0.0*#cf 
+node no 17 x -30.0*#cf y 7.16*#cf z 0.0*#cf 
+node no 18 x -40.0*#cf y 10.59*#cf z 0.0*#cf 
 
 
 !*!Label *** LINE ELEMENTS ***
@@ -78,5 +78,11 @@ cabl no 26 na 6 ne 15
 cabl no 27 na 7 ne 16 
 cabl no 28 na 8 ne 17 
 cabl no 29 na 9 ne 18 
+
+
+!*!Label *** AREA ELEMENTS ***
+
+
+!*!Label *** SINGLE NODE SPRINGS ***
 
 end
