@@ -1,3 +1,26 @@
+#banner {
+
+	width: 200px;
+
+}
+
+#footer {
+
+	width: 80px;
+	margin: 50px auto 20px auto;
+
+}
+
+#credit {
+
+	display: block;
+	font-size: 14px;
+	font-weight: bold;
+	color: #222;
+	margin: auto auto 65px auto;
+
+}
+
 h1, h2, h3, h4, p {
 
 	color: #222;
@@ -118,7 +141,7 @@ div.code {
 
 .section {
 
-	padding: 20px 35px;
+	padding: 45px 35px 20px 35px;
 	margin: 20px auto;
 	/* border: 1px solid black; */
 
@@ -140,7 +163,7 @@ a:hover {
 
 h1 {
 
-	font-size: 24px;
+	font-size: 28px;
 	margin-top: 45px;
 
 }
