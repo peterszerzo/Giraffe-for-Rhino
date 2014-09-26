@@ -41,3 +41,10 @@ object_types = {
    "Clip"       : 536870912
 
 }
+
+point_elements = [ "nodes" ]
+line_elements = [ "beams", "trusses", "cables" ]
+area_elements = [ "quads" ]
+spring_elements = [ "springs" ]
+
+all_elements = point_elements + line_elements + area_elements + spring_elements

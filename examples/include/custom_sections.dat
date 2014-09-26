@@ -37,6 +37,7 @@ plat   no       yb                  zb                           ye          ze 
        3        0                   -#tf/2                       0           +#h-#tf/2   #tw
 #enddef
 
+
 #define t-sect
 let#alpha 0
 #include t-sect-rot
@@ -45,8 +46,8 @@ let#alpha 0
 
 #define cruciform
 sect #ncs mno #mno
-PLAT NO  1 YB  -#b/2     ZB 0        YE 0  ZE 0       T #tf
-PLAT NO  2 YB  +#b/2     ZB 0        YE 0  ZE 0       T #tf
-PLAT NO  3 YB  0     ZB -#h/2        YE 0  ZE 0       T #tw
-PLAT NO  4 YB  0     ZB +#h/2        YE 0  ZE 0       T #tw
+plat no 1  yb  -#b/2     zb 0        ye 0   ze 0   t #tf
+plat no 2  yb  +#b/2     zb 0        ye 0   ze 0   t #tf
+plat no 3  yb  0         zb -#h/2    ye 0   ze 0   t #tw
+plat no 4  yb  0         zb +#h/2    ye 0   ze 0   t #tw
 #enddef

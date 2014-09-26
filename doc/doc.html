@@ -3,7 +3,9 @@
 
 	<head>
 		<title>Giraffe</title>
-		<link rel="stylesheet" type="text/css" href="style.css">
+		<link rel="stylesheet" type="text/css" href="style/normalize.css">
+		<link rel="stylesheet" type="text/css" href="style/custom.css">
+		<link rel="stylesheet" type="text/css" href="style/font-awesome-4.2.0/css/font-awesome.min.css">
 	</head>
 
 	<body>
@@ -14,9 +16,28 @@
 
 			<h2 class="center">a structural engineering add-on</h2>
 
-			<div class="section" data-chapter="0">
+			<div class="nav">
+				<a><i class="fa fa-home fa-3x" id="home"></i></a>
+				<a><i class="fa fa-mortar-board fa-3x" id="tutorial"></i></a>
+				<a><i class="fa fa-book fa-3x" id="doc"></i></a>
+				<a href="https://github.com/pickled-plugins/Giraffe-for-Rhino" target="_blank"><i class="fa fa-github fa-3x" id="github"></i></a>
+			</div>
 
-				<h3>0. Introduction</h3>
+			<div class="tutorialnav">
+				<a><i class="fa fa-leaf fa-2x" id="tut1"></i></a>
+				<a><i class="fa fa-leaf fa-2x" id="tut2"></i></a>
+				<a><i class="fa fa-leaf fa-2x" id="tut3"></i></a>
+				<a><i class="fa fa-leaf fa-2x" id="tut4"></i></a>
+				<a><i class="fa fa-leaf fa-2x" id="tut5"></i></a>
+			</div>
+
+			<div class="docnav">
+				<a><i class="fa fa-leaf fa-2x" id="tut1"></i></a>
+				<a><i class="fa fa-leaf fa-2x" id="tut2"></i></a>
+			</div>
+
+			<div class="section" id="ch-0">
+
 				<p>Giraffe is an add-on for Rhino that imports wireframe geometry into a structural engineering package. It allows for seamless transitions from architectural to structural models, easy adjustments and spotless clean organization, all within the comfort of Rhino.</p>
 
 				<h4>Benefits:</h4>
@@ -58,7 +79,7 @@
 
 			</div>
 
-			<div class="section" data-chapter="1">
+			<div class="section" id="ch-1">
 
 				<h3>1. Basic Rhino Layout</h3>
 
@@ -84,7 +105,7 @@
 
 			</div>
 
-			<div class="section" data-chapter="2">
+			<div class="section" id="ch-2">
 
 				<!-- structural properties -->
 				<h3>2. Adding Structural Properties</h3>
@@ -143,7 +164,7 @@ $ [...]
 
 			</div>
 
-			<div class="section" data-chapter="3">
+			<div class="section" id="ch-3">
 
 				<h3>3. Labeling the Model</h3>
 
@@ -182,7 +203,7 @@ $ [...]
 
 			</div>
 
-			<div class="section" data-chapter="4">
+			<div class="section" id="ch-4">
 						
 				<h3>4. Exporting</h3>
 
@@ -315,9 +336,19 @@ end
 
 			</div>
 
-			<div class="section" data-chapter="5">
+			<div class="section" id="ch-5">
+				
+				<h3>5. The Structural Model</h3>
 
-				<h3>5. Input Syntax in Detail</h3>
+				<h4>5.1. Coordinate System</h4>
+
+				<p>Giraffe's coordinate system mymics Rhino's regular right-handed coordinate system. The z-axis always points upwards.</p>
+
+			</div>
+
+			<div class="section" id="ch-6">
+
+				<h3>6. Input Syntax in Detail</h3>
 
 				<p>As shown in the previous examples, layer- and object names follow a very simple syntax that uses square and curly braces. This section describes this syntax in rigorous detail.</p>
 
@@ -329,7 +360,7 @@ end
 					<li>name: group or element name. These show up in labels and comments in the sofimsha file to keep it organized</li>
 				</ul>
 
-				<h4>5.1. Syntax Rules</h4>
+				<h4>6.1. Syntax Rules</h4>
 				<p>The basic format is the following:</p>
 				<div class="syntax">
 					<div class="syntax-block">no</div>
@@ -346,15 +377,61 @@ end
 				<p>Square brackets are ommitted, as Rhino does not allow a layer name to start with them. Giraffe will not confuse 'prop' with 'no', as prop is never a number.</p>
 				<p>If you wish to ommit the prop as well, you need to add a '#' placeholder, as you cannot start a layer name with '{'.</p>
 
-				<h4>5.2. Examples:</h4>
+				<h4>6.2. Examples:</h4>
 
-				<p>The following examples will get you familiar with the input syntax.</p>
+				<p>The following table includes all possible syntax combinations.</p>
+
+				<table>
+					<tr>
+						<th>Input</th>
+						<th>no</th>
+						<th>prop</th>
+						<th>name</th>
+					</tr>
+					<tr>
+						<td>5 [ahin mymz] {some beam}</td>
+						<td>5</td>
+						<td>ahin mymz</td>
+						<td>some beam</td>
+					</tr>
+					<tr>
+						<td>5 {some beam}</td>
+						<td>5</td>
+						<td></td>
+						<td>some beam</td>
+					</tr>
+					<tr>
+						<td>5</td>
+						<td>5</td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>ahin mymz {some beam}</td>
+						<td></td>
+						<td>ahin mymz</td>
+						<td>some beam</td>
+					</tr>
+					<tr>
+						<td>ahin mymz</td>
+						<td></td>
+						<td>ahin mymz</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td># {some beam}</td>
+						<td></td>
+						<td></td>
+						<td>some beam</td>
+					</tr>
+				</table>
 
 			</div>
 
 		</div>
 
-		<script src="jquery-2.1.1.min.js">
+		<script src="script/jquery-2.1.1.min.js"></script>
+		<script src="script/site.js"></script>
 
 	</body>
 

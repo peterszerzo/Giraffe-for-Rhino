@@ -1,7 +1,6 @@
 !*!Label steel
 stee no 1 fy 50000[psi] ft 70000[psi] es 29000[ksi] gam 78.5 alfa 1.2E-05 scm 1 tmax 5000[mm] titl '50ksi structural steel'
 stee no 2 fy 25000[psi] ft 70000[psi] es 29000[ksi] gam 78.5 alfa 1.2E-05 scm 1 tmax 5000[mm] titl 'astm a240 s31603-ss316l'
-
 stee no 301 type y 1770  es 160000 gam 78.5  titl 'pfeifer spiral strand'
 stee no 302 type y 1570C es 160000 gam 78.5  titl 'pfeifer fully locked'
 
