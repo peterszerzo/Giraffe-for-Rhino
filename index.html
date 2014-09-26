@@ -229,30 +229,15 @@ $ [...]
 
 				<h4>Getting the Project Folder</h4>
 
-				<p>Giraffe lives online <a href="https://github.com/pickled-plugins/Giraffe-for-Rhino">here</a>. On the right of the screen, you should see a Download ZIP button. Unpack this folder and save it at a convenient location on your computer. This folder is referred to as the project folder.</p>
-
-				<h4>Tolerance</h4>
-
-				<p>Modeling is hardly ever perfect and things are going to misalign. Giraffe merges together all nodes that are within a specified tolerance from each other. The tolerance value can be adjusted in the src/giraffe_configure.py file within the project folder. Tolerance is always measured in the units of your model.</p>
-
-				<p>You will want to set the tolerance to a value that is smaller than the length of your shortest member but higher than the largest modeling error you are expecting. If, for instance, you know that your shortest member is 4" long and that some beams which should come together at the same node end up 1/2" apart due to drawing errors, a 1" tolerance value will make sure everything works the way you want it.</p>
-
-				<h4>Automatic Numbering</h4>
-
-				<p>If a node- or element number is unspecified, Giraffe will add one such that numbering conflicts are avoided. Same goes for the endpoints of line elements which do not have a corresponding point object in Rhino.</p>
+				<p>Giraffe lives online <a href="https://github.com/pickled-plugins/Giraffe-for-Rhino" target="_blank">here</a>. On the right of the screen, you should see a Download ZIP button. Unpack this folder and save it at a convenient location on your computer. This folder is referred to as the project folder.</p>
 
 				<h4>Running the Plug-in</h4>
 
-				<p>Within Rhino, enter the command 'RunPythonScript' and point to src/Giraffe.py in the project folder. This will generate the sofimsha output in the folder where your 3d model is located. The file is named depending on your operating system:</p>
+				<p>Within Rhino, enter the command 'RunPythonScript' and point to src/Giraffe.py in the project folder. This will generate the sofimsha output in the folder where your 3d model is located, under the name '_system.dat'.</p>
 
-				<ul>
-					<li>Windows: '_system.dat'</li>
-					<li>Mac OS: '[model name].dat'</li>
-				</ul>
+				<p>I very highly recommend not to modify or run this file directly (the underscore in the name emphasizes this). The core idea behind Giraffe is that all information is kept in the Rhino model. If you need to change something, do so graphically, in Rhino. Keep in mind that every time you run Giraffe, this file is newly generated and, unless you rename the file, all your manual changes will be lost.</p>
 
-				<p>I very highly recommend not to modify or run this file directly. The core idea behind Giraffe is that all information is kept in the Rhino model. If you need to change something, do so graphically. Keep in mind that every time you run Giraffe, this file is newly generated and, unless you rename the file, all your manual changes will be lost.</p>
-
-				<p>Instead, the file should be imported into a main file such as 'model.dat' as follows:</p>
+				<p>Here is a suggested main model file 'model.dat' that imports the geometry from Giraffe:</p>
 
 				<div class="code">
 					<pre>
@@ -409,6 +394,16 @@ end
 				<h4>Coordinate System</h4>
 
 				<p>Giraffe's coordinate system mymics Rhino's regular right-handed coordinate system. The z-axis always points upwards.</p>
+
+				<h4>Tolerance</h4>
+
+				<p>Modeling is hardly ever perfect and things are going to misalign. Giraffe merges together all nodes that are within a specified tolerance from each other. The tolerance value can be adjusted in the src/giraffe_configure.py file within the project folder. Tolerance is always measured in the units of your model.</p>
+
+				<p>You will want to set the tolerance to a value that is smaller than the length of your shortest member but higher than the largest modeling error you are expecting. If, for instance, you know that your shortest member is 4" long and that some beams which should come together at the same node end up 1/2" apart due to drawing errors, a 1" tolerance value will make sure everything works the way you want it.</p>
+
+				<h4>Automatic Numbering</h4>
+
+				<p>If a node- or element number is unspecified, Giraffe will add one such that numbering conflicts are avoided. Same goes for the endpoints of line elements which do not have a corresponding point object in Rhino.</p>
 
 			</div>
 

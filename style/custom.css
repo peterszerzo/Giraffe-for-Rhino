@@ -1,4 +1,4 @@
-* {
+h1, h2, h3, h4, p {
 
 	color: #222;
 
@@ -81,7 +81,7 @@ div.nav a i {
 
 }
 
-.code {
+div.code {
 
 	width: 70%;
 	margin: 30px auto;
@@ -127,6 +127,14 @@ div.nav a i {
 a {
 
 	text-decoration: none;
+	color: #CD7F32;
+	font-weight: bold;
+
+}
+
+a:hover {
+
+	color: #BD5F32;
 
 }
 
