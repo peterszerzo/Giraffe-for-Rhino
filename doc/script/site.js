@@ -2,50 +2,75 @@ $(document).ready(function() {
 
 	var $sections = $(".section"),
 		i, max = $sections.length,
-		currentSection = 0;
+		currentSection = 0,
+		currentType = "home";
 
-	function changeSection(new_section) {
+	function getCurrent() {
 
-		$("#ch-" + currentSection).hide();
-		currentSection = new_section;
-		$("#ch-" + currentSection).fadeIn();
+		return $("#" + currentType + "-" + currentSection);
+
+	}
+
+	function fadeInCurrent() {
+
+		getCurrent().fadeIn();
+
+	}
+
+	function changeSection(newType, newSection) {
+
+		getCurrent().hide();
+		currentType = newType;
+		currentSection = newSection;
+		getCurrent().fadeIn();
 
 	}
 
 	$sections.hide();
-	$(".tutorialnav").hide();
-	$(".docnav").hide();
+	$(".tut-nav").hide();
+	$(".doc-nav").hide();
 
-	$(".tutorialnav").click(function(event){
+	fadeInCurrent();
 
-		var no = $(event.target).attr("id").slice(-1);
-		changeSection(no);
+	$(".tut-nav, .doc-nav").click(function(event){
 
-	});
+		event.preventDefault();
 
-	$("#ch-" + currentSection).fadeIn();
+		var id = $(event.target).attr("id"),
+			no = id.slice(-1),
+			type = id.substr(0, id.indexOf('-'));
 
-	$("#home").click(function() {
-
-		changeSection(0);
-		$(".tutorialnav").fadeOut();
-		$(".docnav").fadeOut();
+		changeSection(type, no);
 
 	});
 
-	$("#doc").click(function() {
+	$("#home").click(function(event) {
 
-		changeSection(0);
-		$(".docnav").fadeIn();
-		$(".tutorialnav").hide();
+		event.preventDefault();
+
+		changeSection("home", 0);
+		$(".tut-nav").fadeOut();
+		$(".doc-nav").fadeOut();
 
 	});
 
-	$("#tutorial").click(function() {
+	$("#doc").click(function(event) {
 
-		changeSection(1);
-		$(".tutorialnav").fadeIn();
-		$(".docnav").hide();
+		event.preventDefault();
+
+		changeSection("doc", 0);
+		$(".doc-nav").fadeIn();
+		$(".tut-nav").hide();
+
+	});
+
+	$("#tut").click(function(event) {
+
+		event.preventDefault();
+
+		changeSection("tut", 0);
+		$(".tut-nav").fadeIn();
+		$(".doc-nav").hide();
 
 	});
 

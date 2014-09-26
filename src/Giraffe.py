@@ -20,11 +20,11 @@ def get_output_path():
 
     if gc.operating_system == "mac":
 
-        path = path[:i-3] + ".dat" 
+        path = path[:i-3] + ".dat"
 
     elif gc.operating_system == "win":
 
-        path = path[:i] + "/system.dat" 
+        path = path[:i] + "/_system.dat" 
 
     return path
 
