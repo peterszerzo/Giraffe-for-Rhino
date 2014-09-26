@@ -15,14 +15,15 @@ def get_output_path():
     """Returns output path as 'system.dat' in the directory of the Rhino model (Windows + Mac OS)."""
 
     path = rs.DocumentPath()
-
-    i = path.rfind("\\")
-
+    name = rs.DocumentName()
+    
     if gc.operating_system == "mac":
 
-        path = path[:i-3] + ".dat"
+        path = path[:-len(name)] + "_system.dat"
 
     elif gc.operating_system == "win":
+
+        i = path.rfind("\\")
 
         path = path[:i] + "/_system.dat" 
 
