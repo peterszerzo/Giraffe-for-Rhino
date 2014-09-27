@@ -1,76 +1,107 @@
 $(document).ready(function() {
 
-	var $sections = $(".section"),
-		i, max = $sections.length,
-		currentSection = 0,
-		currentType = "home";
+	// adding a prefix and a suffix to each member in a string list, and concatenate with a separator
+	function solidConcat(stringList, prefix, suffix, separator) {
 
-	function getCurrent() {
+		var i, max = stringList.length,
+			result = "";
 
-		return $("#" + currentType + "-" + currentSection);
+		for (i = 0; i < max; i += 1) {
 
-	}
+			result += prefix + stringList[i] + suffix;
 
-	function fadeInCurrent() {
+			if (i !== max - 1) {
 
-		getCurrent().fadeIn();
+				result += separator;
 
-	}
+			}
 
-	function changeSection(newType, newSection) {
+		}
 
-		getCurrent().hide();
-		currentType = newType;
-		currentSection = newSection;
-		getCurrent().fadeIn();
+		return result;
 
 	}
 
-	$sections.hide();
-	$(".tut-nav").hide();
-	$(".doc-nav").hide();
+	var Jumper = {
 
-	fadeInCurrent();
+		types: [],
 
-	$(".tut-nav, .doc-nav").click(function(event){
+		type: "home",
+		section: 0,
+
+		getCurrent: function() {
+
+			return $("#" + this.type + "-" + this.section);
+
+		},
+
+		fadeInCurrent: function() {
+
+			this.getCurrent().fadeIn();
+
+		},
+
+		jump: function(newType, newSection) {
+
+			this.getCurrent().hide();
+			this.type = newType;
+			this.section = newSection;
+			this.getCurrent().fadeIn();
+
+		},
+
+		getIDs: function() {
+
+			return solidConcat(this.types, "#", "", ", ");
+
+		},
+
+		getNavIDs: function() {
+
+			return solidConcat(this.types, "#", "-nav", ", ");
+
+		},
+
+	};
+
+	Jumper.types = ["home", "tut", "doc"];
+
+	$(".section").hide();
+	$(Jumper.getNavIDs()).hide();
+
+	Jumper.fadeInCurrent();
+
+	$(Jumper.getNavIDs()).click(function(event){
+
+		var id, no, type;
 
 		event.preventDefault();
 
-		var id = $(event.target).attr("id"),
-			no = id.slice(-1),
-			type = id.substr(0, id.indexOf('-'));
+		no = $(event.target).attr("data-ch");
 
-		changeSection(type, no);
+		if (no) {
+
+			id = $(this).attr("id");
+			type = id.slice(0, id.indexOf('-'));
+
+			Jumper.jump(type, no);
+
+		}
 
 	});
 
-	$("#home").click(function(event) {
+	$(Jumper.getIDs()).click(function() {
+
+		var id;
 
 		event.preventDefault();
 
-		changeSection("home", 0);
-		$(".tut-nav").fadeOut();
-		$(".doc-nav").fadeOut();
+		$(Jumper.getNavIDs()).hide();
 
-	});
+		id = $(this).attr("id");
 
-	$("#doc").click(function(event) {
-
-		event.preventDefault();
-
-		changeSection("doc", 0);
-		$(".doc-nav").fadeIn();
-		$(".tut-nav").hide();
-
-	});
-
-	$("#tut").click(function(event) {
-
-		event.preventDefault();
-
-		changeSection("tut", 0);
-		$(".tut-nav").fadeIn();
-		$(".doc-nav").hide();
+		Jumper.jump(id, 0);
+		$("#" + id + "-nav").fadeIn();
 
 	});
 

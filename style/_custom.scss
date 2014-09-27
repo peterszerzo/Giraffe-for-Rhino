@@ -21,16 +21,28 @@
 
 }
 
-h1, h2, h3, h4, p {
-
-	color: #222;
-
-}
+h1, h2, h3, h4, p { color: #222; }
 
 div.nav {
 
-	width: 400px;
+	width: 390px; /* should be 385 */
 	margin: 60px auto auto auto;
+
+	a {
+
+		width: 90px;
+		display: inline-block;
+		border: 0px solid black;
+		margin: 0;
+
+		i {
+
+			display: block;
+			margin: 0 0 0 25px;
+
+		}
+
+	}
 
 }
 
@@ -41,48 +53,20 @@ div.nav {
 
 }
 
-div.nav a {
+#tut-nav, #doc-nav { margin: 45px auto auto auto; }
 
-	width: 90px;
-	display: inline-block;
-	border: 0px solid black;
-	margin: 0;
+#tut-nav { width: 160px; }
 
-}
-
-.tut-nav {
-
-	width: 168px;
-	margin: 45px auto auto auto;
-
-}
-
-.doc-nav {
-
-	width: 126px;
-	margin: 45px auto auto auto;
-
-}
+#doc-nav { width: 120px; }
 
 i {
 
-	color: #CD7F32;
+	color: $color-base;
 	margin: 0;
 	padding: 0;
 	border: 0;
 
-}
-
-i:hover {
-
-	color: #BD5F32;
-
-}
-
-div.nav a i {
-
-	display: block;
-	margin: 0 0 0 25px;
+	&:hover { color: $color-hover; }
 
 }
 
@@ -95,6 +79,16 @@ div.nav a i {
 
 }
 
+a {
+
+	text-decoration: none;
+	color: #CD7F32;
+	font-weight: bold;
+
+	&:hover { color: $color-hover; }
+
+}
+
 .center {
 
 	display: block;
@@ -104,13 +98,13 @@ div.nav a i {
 
 }
 
-div.code {
+.code {
 
 	width: 70%;
 	margin: 30px auto;
 	padding: 20px;
 	border-radius: 15px;
-	background-color: #CD7F32;
+	background-color: $color-base;
 	color: white;
 	overflow: scroll;
 
@@ -133,31 +127,13 @@ div.code {
 
 }
 
-.bridge {
-
-	width: 80%;
-
-}
+.bridge { width: 80%; }
 
 .section {
 
 	padding: 45px 35px 20px 35px;
 	margin: 20px auto;
 	/* border: 1px solid black; */
-
-}
-
-a {
-
-	text-decoration: none;
-	color: #CD7F32;
-	font-weight: bold;
-
-}
-
-a:hover {
-
-	color: #BD5F32;
 
 }
 
@@ -168,11 +144,7 @@ h1 {
 
 }
 
-h2 {
-
-	font-size: 18px;
-
-}
+h2 { font-size: 18px; }
 
 h1, h2 {
 
@@ -182,29 +154,13 @@ h1, h2 {
 
 }
 
-h4 {
+h4 { margin-top: 35px; }
 
-	margin-top: 35px;
+p { line-height: 150%; }
 
-}
+img { border-radius: 15px; }
 
-p {
-
-	line-height: 150%;
-
-}
-
-img {
-
-	border-radius: 15px;
-
-}
-
-li {
-
-	margin: 10px auto;
-
-}
+li { margin: 10px auto; }
 
 th, td {
 
