@@ -75,14 +75,14 @@ i {
 	width: 55%;
 	min-width: 600px;
 	margin: 70px auto;
-	font-family: "Courier New";
+	font-family: "Ubuntu Mono";
 
 }
 
 a {
 
 	text-decoration: none;
-	color: #CD7F32;
+	color: $color-base;
 	font-weight: bold;
 
 	&:hover { color: $color-hover; }
