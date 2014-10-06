@@ -90,7 +90,7 @@ $(document).ready(function() {
 
 	});
 
-	$(Jumper.getIDs()).click(function() {
+	$(Jumper.getIDs()).click(function(event) {
 
 		var id;
 
