@@ -4,9 +4,9 @@
 	<head>
 		<title>Giraffe</title>
 		<link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
-		<link rel="shortcut icon" href="images/giraffe.ico" />
-		<link rel="stylesheet" type="text/css" href="style/style.css">
-		<link rel="stylesheet" type="text/css" href="style/font-awesome-4.2.0/css/font-awesome.min.css">
+		<link rel="shortcut icon" href="assets/images/giraffe.ico" />
+		<link rel="stylesheet" type="text/css" href="assets/style/style.css">
+		<link rel="stylesheet" type="text/css" href="assets/style/font-awesome-4.2.0/css/font-awesome.min.css">
 	</head>
 
 	<body>
@@ -15,7 +15,7 @@
 
 			<div class="center" id="banner">
 
-				<img class="center" src="images/logo.svg">
+				<img class="center" src="assets/images/logo.svg">
 
 			</div>
 
@@ -89,11 +89,11 @@
 
 				<p>The following tutorial walks through creating a simple model of a suspension bridge. This model may be found in the examples folder.</p>
 
-				<img class="center bridge" src="images/bridge-rhino.png">
+				<img class="center bridge" src="assets/images/bridge-rhino.png">
 
 				<p>The finished model will look like this:</p>
 
-				<img class="center bridge" src="images/bridge-sofi.png">
+				<img class="center bridge" src="assets/images/bridge-sofi.png">
 
 				<p>Navigate this tutorial by clicking the leaves.</p>
 
@@ -105,7 +105,7 @@
 
 				<p>Giraffe requires structural elements (points, lines and quads in Rhino) to be organized in a strict layer structure. Here is a basic example of a layer structure for the suspension bridge model. This model will contain custom nodes, beams in group 1 as well as cables in groups 10 and 11.</p>
 
-				<img class="center" src="images/layers-basic.png">
+				<img class="center" src="assets/images/layers-basic.png">
 
 				<p>For now, the 'nodes' layer should not have further sublayers. Same goes for the group layers under 'beams', 'cables' and 'trusses'. Providing group numbers is highly recommended.</p>
 
@@ -135,7 +135,7 @@
 				<h4>Layer Names</h4>
 				<p>Properties can be added by adding custom names to layers. Here is a second version of the previous layer structure.</p>
 
-				<img class="center" src="images/layers-with-props.png">
+				<img class="center" src="assets/images/layers-with-props.png">
 
 				<p>Giraffe translates this layer structure into the following sofimsha input:</p>
 
@@ -170,7 +170,7 @@ $ [...]
 
 				<p>Individual structural elements can also get their own numbering and properties. Just add the same deal to the object name (properties panel).</p>
 
-				<img class="center" src="images/object-prop.png">
+				<img class="center" src="assets/images/object-prop.png">
 
 				<p>On the above image, the beam element gets the number 100 in its current group and also gets string- and weak axis hinges at its startpoint.</p>
 
@@ -178,7 +178,7 @@ $ [...]
 
 				<p>Every time Giraffe is run, it automatically adds one purple point on each beam, 1/10 of the way from startpoint to endpoint. The point that's closer to purple is the startpoint. These purple points live under the 'output::startpoints' layer, and are locked automatically to not be in the way of your work.</p>
 
-				<img class="center" src="images/startpoints.png">
+				<img class="center" src="assets/images/startpoints.png">
 
 				<p>The Flip command in Rhino changes the orientation of line elements. Rerun Giraffe to see the purple point move to the other side.</p>
 
@@ -190,7 +190,7 @@ $ [...]
 
 				<p>Let's label things for our suspension bridge:</p>
 
-				<img class="center" src="images/layers-all.png">
+				<img class="center" src="assets/images/layers-all.png">
 
 				<p>And end up with the following:</p>
 
@@ -513,7 +513,7 @@ end
 
 			<div class="center" id="footer">
 
-				<img class="center" src="images/logo.svg">
+				<img class="center" src="assets/images/logo.svg">
 
 			</div>
 
@@ -521,8 +521,7 @@ end
 
 		</div>
 
-		<script src="script/jquery-2.1.1.min.js"></script>
-		<script src="script/site.js"></script>
+		<script src="assets/javascript/build/app.min.js"></script>
 
 	</body>
 
